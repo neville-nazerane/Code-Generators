@@ -1,13 +1,21 @@
-﻿using System;
+﻿using CodeGeneratorHelpers.Core.Internals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
+[assembly: InternalsVisibleTo("CodeGeneratorHelpers.Core.Tests")]
+
 namespace CodeGeneratorHelpers.Core
 {
+
     public class CodeGenerator
     {
+
+        private readonly IFileService _fileService;
+
         /// <summary>
         /// Path of target app to generate code on
         /// </summary>
@@ -20,6 +28,13 @@ namespace CodeGeneratorHelpers.Core
         /// Default: "Generated"
         /// </summary>
         public string GeneratedFilesPath { get; set; } = "Generated";
+
+        internal CodeGenerator(IFileService fileService)
+        {
+            _fileService = fileService;
+        }
+
+        public CodeGenerator() : this(new FileService()) { }
 
         /// <summary>
         /// Path of target app to generate code on
@@ -47,19 +62,18 @@ namespace CodeGeneratorHelpers.Core
             char[] dirSeperators = ['/', '\\'];
 
             var cleanedAppPath = Path.Combine(TargetAppPath.Split(dirSeperators));
-
-            var dirs = Directory.GetCurrentDirectory().Split(dirSeperators);
+            var dirs = _fileService.GetCurrentDirectory().Split(dirSeperators);
 
             var triedPaths = new List<string>();
 
             for (int i = dirs.Length - 1; i >= 0; i--)
             {
                 string path = Path.Combine(dirs.Take(i).ToArray());
-                if (path.EndsWith(cleanedAppPath) && Directory.Exists(path))
+                if (path.EndsWith(cleanedAppPath) && _fileService.DirectoryExists(path))
                     return path;
                 triedPaths.Add(path);
                 path = Path.Combine(path, cleanedAppPath);
-                if (Directory.Exists(path))
+                if (_fileService.DirectoryExists(path))
                     return path;
                 triedPaths.Add(path);
             }
@@ -68,7 +82,6 @@ namespace CodeGeneratorHelpers.Core
                 $"Failed to find app path. Tried {string.Join('\n', triedPaths.Select(t => $"'{t}'").ToArray())}");
         }
 
-        
 
 
     }
