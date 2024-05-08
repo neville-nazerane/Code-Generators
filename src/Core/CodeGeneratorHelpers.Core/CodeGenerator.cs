@@ -1,4 +1,5 @@
 ﻿using CodeGeneratorHelpers.Core.Internals;
+using CodeGeneratorHelpers.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +30,12 @@ namespace CodeGeneratorHelpers.Core
         /// </summary>
         public string GeneratedFilesPath { get; set; } = "Generated";
 
+        public List<Func<GenerationContext, Task>> Processes { get; }
+
         internal CodeGenerator(IFileService fileService)
         {
             _fileService = fileService;
+            Processes = [];
         }
 
         public CodeGenerator() : this(new FileService()) { }
@@ -57,6 +61,22 @@ namespace CodeGeneratorHelpers.Core
             return this;
         }
 
+        /// <summary>
+        /// Add a process to be executed during generation
+        /// </summary>
+        /// <param name="process"></param>
+        /// <returns></returns>
+        public CodeGenerator AddProcess(Func<GenerationContext, Task> process)
+        {
+            Processes.Add(process);
+            return this;
+        }
+
+        /// <summary>
+        /// Get the full path of the target app based on the target app path set
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="DirectoryNotFoundException"></exception>
         public string GetFullTargetAppPath()
         {
             char[] dirSeperators = ['/', '\\'];
@@ -81,8 +101,6 @@ namespace CodeGeneratorHelpers.Core
             throw new DirectoryNotFoundException(
                 $"Failed to find app path. Tried {string.Join('\n', triedPaths.Select(t => $"'{t}'").ToArray())}");
         }
-
-
 
     }
 }
