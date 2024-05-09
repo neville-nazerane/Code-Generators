@@ -4,18 +4,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Core.Internals
 {
-    internal class CodeUtility
+    internal partial class CodeUtility
     {
+
+        [GeneratedRegex(@"^(?<accessibility>public|private|internal|protected)?\s*(?<modifier>static|abstract)?\s*class\s+(?<className>\w+)(?<openBracket>\s*{\s*)?(?<closeBracket>\s*}\s*)?$", RegexOptions.Compiled)]
+        private static partial Regex ClassMatch();
 
         internal static async Task<CodeMetadata> GetCodeMetaDataAsync(IAsyncEnumerable<string> lines, CancellationToken cancellationToken = default)
         {
             var result = new CodeMetadata();
             await foreach (var line in lines)
             {
+                var pattern = ClassMatch();
+                var match = pattern.Match(line);
+
+                if (match.Success)
+                {
+                    var accessibility = match.Groups["accessibility"].Value.Trim();
+                    var modifier = match.Groups["modifier"].Value.Trim();
+                    var className = match.Groups["className"].Value.Trim();
+                    var open = match.Groups["openBracket"].Success;
+                    
+                }
 
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -23,7 +38,7 @@ namespace CodeGeneratorHelpers.Core.Internals
             return result;
         }
 
-        internal static Task<CodeMetadata> GetCodeMetaDataAsync(string rawString, CancellationToken cancellationToken)
+        internal static Task<CodeMetadata> GetCodeMetaDataAsync(string rawString, CancellationToken cancellationToken = default)
         {
             var lines = AsAsyncEnumerableLines(rawString, cancellationToken);
             return GetCodeMetaDataAsync(lines, cancellationToken);
@@ -39,6 +54,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 yield return line;
             }
         }
+
 
     }
 }
