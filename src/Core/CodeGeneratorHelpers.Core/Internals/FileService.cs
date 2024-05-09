@@ -13,7 +13,7 @@ namespace CodeGeneratorHelpers.Core.Internals
 
         public bool DirectoryExists(string path) => Directory.Exists(path);
 
-
+        public string Combine(string path1, string path2) => Path.Combine(path1, path2);
 
     }
 }

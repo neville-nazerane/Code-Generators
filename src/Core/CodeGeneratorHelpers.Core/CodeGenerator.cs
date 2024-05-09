@@ -142,14 +142,30 @@ namespace CodeGeneratorHelpers.Core
                 $"Failed to find app path. Tried {string.Join('\n', triedPaths.Select(t => $"'{t}'").ToArray())}");
         }
 
+        public async Task<CodeGenerator> RunAsync()
+        {
+            var fullTargetPath = GetFullTargetAppPath();
 
+            var generationPath = _fileService.Combine(fullTargetPath, GeneratedFilesPath);
 
-        //public async Task<CodeGenerator> RunAsync()
-        //{
-        //    Parallel.ForEachAsync(Processes)
+            var chunks = Processes.Chunk(MaxDegreeOfParallelism);
 
-        //    return this;
-        //}
+            foreach (var chunk in chunks)
+            {
+                var tasks = chunk.Select(async c =>
+                {
+                    var context = new GenerationContext
+                    {
+                        RootPath = fullTargetPath,
+                        GenerationFullPath = generationPath
+                    };
+                    await c(null);
+                }).ToArray();
+                await Task.WhenAll(tasks);
+            }
+
+            return this;
+        }
 
     }
 }

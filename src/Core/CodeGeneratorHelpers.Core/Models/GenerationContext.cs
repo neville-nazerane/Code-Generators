@@ -9,6 +9,10 @@ namespace CodeGeneratorHelpers.Core.Models
     public class GenerationContext
     {
 
+        public string RootPath { get; set; }
+
+        public string GenerationFullPath { get; set; }
+
 
 
     }
