@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Core.Models
 {
-    public class CodeMetadata
+    public class ClassMetaData : CodeMetadata
     {
 
-        public IEnumerable<ClassMetaData> Classes { get; set; }
+        public string ClassName { get; set; }
+
+
 
     }
 }

@@ -1,4 +1,7 @@
 ﻿using CodeGeneratorHelpers.Core.Models;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +45,27 @@ namespace CodeGeneratorHelpers.Core.Internals
         {
             var lines = AsAsyncEnumerableLines(rawString, cancellationToken);
             return GetCodeMetaDataAsync(lines, cancellationToken);
+        }
+
+        internal static CodeMetadata GetCodeMetaData(string rawCode)
+        {
+            var res = new CodeMetadata();
+
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(rawCode);
+            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var classNodes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
+
+
+            res.Classes = classNodes.Select(c => new ClassMetaData
+            {
+                ClassName = c.Identifier.Text
+            }).ToArray();
+
+            //List<string> classNames = classNodes.Select(c => c.Identifier.Text).ToList();
+
+
+
+            return res;
         }
 
         static async IAsyncEnumerable<string> AsAsyncEnumerableLines(string rawString, [EnumeratorCancellation]CancellationToken cancellationToken = default)

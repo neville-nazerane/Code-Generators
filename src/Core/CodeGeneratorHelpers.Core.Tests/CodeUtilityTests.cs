@@ -12,7 +12,7 @@ namespace CodeGeneratorHelpers.Core.Tests
     {
 
         [Fact]
-        public async Task GetCodeMetaData_SingleTest_ReturnsClassData()
+        public void GetCodeMetaData_SingleTest_ReturnsClassData()
         {
             string data = @"
 
@@ -27,7 +27,7 @@ internal static class WonderWoman {  }
 ";
 
 
-            await CodeUtility.GetCodeMetaDataAsync(data);
+            var res = CodeUtility.GetCodeMetaData(data);
 
         }
 
