@@ -16,6 +16,7 @@ namespace CodeGeneratorHelpers.Core
         {
             var fullTargetPath = GetFullTargetAppPath();
 
+            // TODO handle /\
             var generationPath = _fileService.Combine(fullTargetPath, GenerationDestinationPath);
 
             // clean up generation path

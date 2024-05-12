@@ -1,5 +1,6 @@
 ﻿using CodeGeneratorHelpers.Core.Internals;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,26 +24,47 @@ namespace CodeGeneratorHelpers.Core.Models
             _generationState = generationState;
         }
 
-        public Task<string> ReadTextInFileAsync(string filePath)
-        {
-            string fullFilePath = _fileService.Combine(RootFullPath, filePath);
-            return _fileService.ReadAllTextAsync(fullFilePath);
-        }
+        public Task<string> ReadTextInFileAsync(string filePath) 
+            => _fileService.ReadAllTextAsync(GetFullPath(filePath));
 
-        public Task WriteAllTextToFileAsync(string filePath, string rawText)
-        {
-            string fullFilePath = _fileService.Combine(RootFullPath, filePath);
-            return _fileService.WriteAllTextAsync(fullFilePath, rawText);
-        }
+        public Task WriteAllTextToFileAsync(string filePath, string rawText) 
+            => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
 
         public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath)
         {
-            string fullFilePath = _fileService.Combine(RootFullPath, filePath);
+            string fullFilePath = GetFullPath(filePath);
             var text = await _fileService.ReadAllTextAsync(fullFilePath);
             return CodeUtility.GetCodeMetaData(text, filePath);
         }
 
+        public async IAsyncEnumerable<CodeMetadata> ReadAllFilesMetaDataAsync(string folderPath = null,
+                                                                              int maxDegreeOfParallelism = 10)
+        {
+            
+            var path = GetFullPath(folderPath);
+            
+            var filePaths = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
+                                     .Where(f => !f.StartsWith(GenerationFullPath, StringComparison.OrdinalIgnoreCase))
+                                     .ToArray();
 
+            var chunks = filePaths.Chunk(maxDegreeOfParallelism);
+
+            foreach (var chunk in chunks)
+            {
+                var allMetaData = new ConcurrentBag<CodeMetadata>();
+
+                var tasks = chunk.Select(f => Task.Run(async () => allMetaData.Add(await ReadMetadataFromFileAsync(f))));
+
+                await Task.WhenAll(tasks);
+
+                foreach (var metaData in allMetaData)
+                    yield return metaData;
+            }
+
+        }
+
+        private string GetFullPath(string filePath) 
+            => filePath is null ? RootFullPath : _fileService.Combine(RootFullPath, filePath);
 
     }
 }

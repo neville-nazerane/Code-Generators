@@ -25,15 +25,20 @@ namespace CodeGeneratorHelpers.Core.Internals
             var tree = CSharpSyntaxTree.ParseText(rawCode);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
-            FillUpMetaData(root, metaData);
+            FillUpMetaData(root, metaData, sourceFilePath);
 
             return metaData;
         }
 
         #region private
 
-        private static void FillUpMetaData(SyntaxNode rootNode, CodeMetadata metaModel)
+        private static void FillUpMetaData(SyntaxNode rootNode,
+                                           CodeMetadata metaModel,
+                                           string sourceFilePath)
         {
+
+            var parentClass = metaModel as ClassMetaData;
+
             var classes = new List<ClassMetaData>();
             var interfaces = new List<InterfaceMetaData>();
             var enums = new List<EnumMetaData>();
@@ -45,23 +50,29 @@ namespace CodeGeneratorHelpers.Core.Internals
                     case ClassDeclarationSyntax classSyntax:
                         var classMeta = new ClassMetaData
                         {
-                            ClassName = classSyntax.Identifier.Text
+                            ClassName = classSyntax.Identifier.Text,
+                            ParentClass = parentClass,
+                            SourceFilePath = sourceFilePath
                         };
-                        FillUpMetaData(node, classMeta);
+                        FillUpMetaData(node, classMeta, sourceFilePath);
                         classes.Add(classMeta);
                         break;
 
                     case InterfaceDeclarationSyntax interfaceSyntax:
                         interfaces.Add(new()
                         {
-                            InterfaceName = interfaceSyntax.Identifier.Text
+                            InterfaceName = interfaceSyntax.Identifier.Text,
+                            ParentClass = parentClass,
+                            SourceFilePath = sourceFilePath
                         });
                         break;
 
                     case EnumDeclarationSyntax enumSyntax:
                         enums.Add(new()
                         {
-                            EnumName = enumSyntax.Identifier.Text
+                            EnumName = enumSyntax.Identifier.Text,
+                            ParentClass = parentClass,
+                            SourceFilePath = sourceFilePath
                         });
                         break;
                 }
