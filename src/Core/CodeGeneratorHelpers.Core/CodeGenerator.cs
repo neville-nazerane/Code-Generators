@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace CodeGeneratorHelpers.Core
 {
 
-    public class CodeGenerator
+    public partial class CodeGenerator
     {
 
         private readonly IFileService _fileService;
@@ -28,12 +28,21 @@ namespace CodeGeneratorHelpers.Core
         /// 
         /// Default: "Generated"
         /// </summary>
-        public string GeneratedFilesPath { get; set; } = "Generated";
+        public string GenerationDestinationPath { get; set; } = "Generated";
 
         /// <summary>
         /// Maximum number of processes that can to run parallel
+        /// Defaults: 5
         /// </summary>
         public int MaxDegreeOfParallelism { get; set; } = 5;
+
+        /// <summary>
+        /// 
+        /// If true, contents of GenerationDestinationPath would be emptied before generation processes begin
+        /// Default: false
+        /// 
+        /// </summary>
+        public bool ClearGenerationDestinationPath { get; set; }
 
         /// <summary>
         /// Processes to execute
@@ -57,6 +66,20 @@ namespace CodeGeneratorHelpers.Core
         public CodeGenerator() : this(new FileService()) { }
 
         /// <summary>
+        /// 
+        /// Empty contents of GenerationDestinationPath before generation processes begin
+        /// Default: false
+        /// 
+        /// </summary>
+        /// <param name="clear"></param>
+        /// <returns></returns>
+        public CodeGenerator EnsureGenerationDestinationPathCleared(bool clear = true)
+        {
+            ClearGenerationDestinationPath = clear;
+            return this;
+        }
+
+        /// <summary>
         /// Path of target app to generate code on
         /// </summary>
         public CodeGenerator SetTargetAppPath(string path)
@@ -73,7 +96,7 @@ namespace CodeGeneratorHelpers.Core
         /// </summary>
         public CodeGenerator SetGeneratedFilesPath(string path)
         {
-            GeneratedFilesPath = path;
+            GenerationDestinationPath = path;
             return this;
         }
 
@@ -119,10 +142,10 @@ namespace CodeGeneratorHelpers.Core
         /// <exception cref="DirectoryNotFoundException"></exception>
         public string GetFullTargetAppPath()
         {
-            char[] dirSeperators = ['/', '\\'];
+            char[] dirSeparators = ['/', '\\'];
 
-            var cleanedAppPath = Path.Combine(TargetAppPath.Split(dirSeperators));
-            var dirs = _fileService.GetCurrentDirectory().Split(dirSeperators);
+            var cleanedAppPath = Path.Combine(TargetAppPath.Split(dirSeparators));
+            var dirs = _fileService.GetCurrentDirectory().Split(dirSeparators);
 
             var triedPaths = new List<string>();
 
@@ -142,30 +165,6 @@ namespace CodeGeneratorHelpers.Core
                 $"Failed to find app path. Tried {string.Join('\n', triedPaths.Select(t => $"'{t}'").ToArray())}");
         }
 
-        public async Task<CodeGenerator> RunAsync()
-        {
-            var fullTargetPath = GetFullTargetAppPath();
-
-            var generationPath = _fileService.Combine(fullTargetPath, GeneratedFilesPath);
-
-            var chunks = Processes.Chunk(MaxDegreeOfParallelism);
-
-            foreach (var chunk in chunks)
-            {
-                var tasks = chunk.Select(async c =>
-                {
-                    var context = new GenerationContext
-                    {
-                        RootPath = fullTargetPath,
-                        GenerationFullPath = generationPath
-                    };
-                    await c(null);
-                }).ToArray();
-                await Task.WhenAll(tasks);
-            }
-
-            return this;
-        }
 
     }
 }
