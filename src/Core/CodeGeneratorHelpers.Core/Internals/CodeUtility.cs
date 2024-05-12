@@ -15,49 +15,19 @@ namespace CodeGeneratorHelpers.Core.Internals
     internal partial class CodeUtility
     {
 
-        [GeneratedRegex(@"^(?<accessibility>public|private|internal|protected)?\s*(?<modifier>static|abstract)?\s*class\s+(?<className>\w+)(?<openBracket>\s*{\s*)?(?<closeBracket>\s*}\s*)?$", RegexOptions.Compiled)]
-        private static partial Regex ClassMatch();
-
-        internal static async Task<CodeMetadata> GetCodeMetaDataAsync(IAsyncEnumerable<string> lines, CancellationToken cancellationToken = default)
+        internal static CodeMetadata GetCodeMetaData(string rawCode) => PopulateCodeMetaData(new(), rawCode);
+        
+        internal static CodeMetadata PopulateCodeMetaData(CodeMetadata metaData, string rawCode)
         {
-            var result = new CodeMetadata();
-            await foreach (var line in lines)
-            {
-                var pattern = ClassMatch();
-                var match = pattern.Match(line);
-
-                if (match.Success)
-                {
-                    var accessibility = match.Groups["accessibility"].Value.Trim();
-                    var modifier = match.Groups["modifier"].Value.Trim();
-                    var className = match.Groups["className"].Value.Trim();
-                    var open = match.Groups["openBracket"].Success;
-                    
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-
-            return result;
-        }
-
-        internal static Task<CodeMetadata> GetCodeMetaDataAsync(string rawString, CancellationToken cancellationToken = default)
-        {
-            var lines = AsAsyncEnumerableLines(rawString, cancellationToken);
-            return GetCodeMetaDataAsync(lines, cancellationToken);
-        }
-
-        internal static CodeMetadata GetCodeMetaData(string rawCode)
-        {
-            var res = new CodeMetadata();
-
             var tree = CSharpSyntaxTree.ParseText(rawCode);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
-            FillUpMetaData(root, res);
+            FillUpMetaData(root, metaData);
 
-            return res;
+            return metaData;
         }
+
+        #region private
 
         private static void FillUpMetaData(SyntaxNode rootNode, CodeMetadata metaModel)
         {
@@ -99,18 +69,6 @@ namespace CodeGeneratorHelpers.Core.Internals
             metaModel.Enums = enums;
         }
 
-
-        static async IAsyncEnumerable<string> AsAsyncEnumerableLines(string rawString, [EnumeratorCancellation]CancellationToken cancellationToken = default)
-        {
-            using var stringReader = new StringReader(rawString);
-            string line;
-            while ((line = await stringReader.ReadLineAsync(cancellationToken)) is not null)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                yield return line;
-            }
-        }
-
-
+        #endregion
     }
 }

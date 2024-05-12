@@ -7,6 +7,6 @@ namespace CodeGeneratorHelpers.Core.Internals
         string Combine(string path1, string path2);
         bool DirectoryExists(string path);
         string GetCurrentDirectory();
-        IAsyncEnumerable<string> GetFileLinesAsync(string fullFilePath, [EnumeratorCancellation] CancellationToken cancellationToken = default);
+
     }
 }
