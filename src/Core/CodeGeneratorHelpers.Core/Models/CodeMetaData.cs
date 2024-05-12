@@ -9,8 +9,11 @@ namespace CodeGeneratorHelpers.Core.Models
     public class CodeMetadata
     {
 
-        public IEnumerable<ClassMetaData> Classes { get; set; }
+        public string SourceFilePath { get; init; }
+
+        public IEnumerable<ClassMetaData> Classes { get; internal set; }
         public IEnumerable<InterfaceMetaData> Interfaces { get; internal set; }
         public IEnumerable<EnumMetaData> Enums { get; internal set; }
+
     }
 }

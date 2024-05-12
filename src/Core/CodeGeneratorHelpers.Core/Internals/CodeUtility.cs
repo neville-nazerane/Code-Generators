@@ -15,10 +15,13 @@ namespace CodeGeneratorHelpers.Core.Internals
     internal partial class CodeUtility
     {
 
-        internal static CodeMetadata GetCodeMetaData(string rawCode) => PopulateCodeMetaData(new(), rawCode);
-        
-        internal static CodeMetadata PopulateCodeMetaData(CodeMetadata metaData, string rawCode)
+        internal static CodeMetadata GetCodeMetaData(string rawCode, string sourceFilePath = null)
         {
+            var metaData = new CodeMetadata
+            {
+                SourceFilePath = sourceFilePath
+            };
+
             var tree = CSharpSyntaxTree.ParseText(rawCode);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 

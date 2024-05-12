@@ -1,4 +1,5 @@
-﻿using CodeGeneratorHelpers.Core.Models;
+﻿using CodeGeneratorHelpers.Core.Internals;
+using CodeGeneratorHelpers.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,20 +21,22 @@ namespace CodeGeneratorHelpers.Core
             // clean up generation path
             if (_fileService.DirectoryExists(generationPath) && ClearGenerationDestinationPath)
                 _fileService.DeleteDirectory(generationPath, true);
-
-            Directory.CreateDirectory(generationPath);
+            
+            _fileService.CreateDirectory(generationPath);
 
             var chunks = Processes.Chunk(MaxDegreeOfParallelism);
+
+            var state = new GenerationState
+            {
+                RootFullPath = fullTargetPath,
+                GenerationFullPath = generationPath
+            };
 
             foreach (var chunk in chunks)
             {
                 var tasks = chunk.Select(async c =>
                 {
-                    var context = new GenerationContext
-                    {
-                        RootFullPath = fullTargetPath,
-                        GenerationFullPath = generationPath
-                    };
+                    var context = new GenerationContext(null, null);
                     await c(null);
                 }).ToArray();
                 await Task.WhenAll(tasks);
