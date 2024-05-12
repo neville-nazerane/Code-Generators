@@ -51,22 +51,54 @@ namespace CodeGeneratorHelpers.Core.Internals
         {
             var res = new CodeMetadata();
 
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(rawCode);
+            var tree = CSharpSyntaxTree.ParseText(rawCode);
             var root = (CompilationUnitSyntax)tree.GetRoot();
-            var classNodes = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
 
-
-            res.Classes = classNodes.Select(c => new ClassMetaData
-            {
-                ClassName = c.Identifier.Text
-            }).ToArray();
-
-            //List<string> classNames = classNodes.Select(c => c.Identifier.Text).ToList();
-
-
+            FillUpMetaData(root, res);
 
             return res;
         }
+
+        private static void FillUpMetaData(SyntaxNode rootNode, CodeMetadata metaModel)
+        {
+            var classes = new List<ClassMetaData>();
+            var interfaces = new List<InterfaceMetaData>();
+            var enums = new List<EnumMetaData>();
+
+            foreach (var node in rootNode.ChildNodes())
+            {
+                switch (node)
+                {
+                    case ClassDeclarationSyntax classSyntax:
+                        var classMeta = new ClassMetaData
+                        {
+                            ClassName = classSyntax.Identifier.Text
+                        };
+                        FillUpMetaData(node, classMeta);
+                        classes.Add(classMeta);
+                        break;
+
+                    case InterfaceDeclarationSyntax interfaceSyntax:
+                        interfaces.Add(new()
+                        {
+                            InterfaceName = interfaceSyntax.Identifier.Text
+                        });
+                        break;
+
+                    case EnumDeclarationSyntax enumSyntax:
+                        enums.Add(new()
+                        {
+                            EnumName = enumSyntax.Identifier.Text
+                        });
+                        break;
+                }
+            }
+
+            metaModel.Classes = classes;
+            metaModel.Interfaces = interfaces;
+            metaModel.Enums = enums;
+        }
+
 
         static async IAsyncEnumerable<string> AsAsyncEnumerableLines(string rawString, [EnumeratorCancellation]CancellationToken cancellationToken = default)
         {

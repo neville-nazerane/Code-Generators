@@ -10,6 +10,7 @@ namespace CodeGeneratorHelpers.Core.Models
     {
 
         public IEnumerable<ClassMetaData> Classes { get; set; }
-
+        public IEnumerable<InterfaceMetaData> Interfaces { get; internal set; }
+        public IEnumerable<EnumMetaData> Enums { get; internal set; }
     }
 }

@@ -14,20 +14,49 @@ namespace CodeGeneratorHelpers.Core.Tests
         [Fact]
         public void GetCodeMetaData_SingleTest_ReturnsClassData()
         {
+
+            // ARRANGE
+
             string data = @"
 
-        somethingNice
+                enum ElectronicNum {
+
+
+        } somethingNice
         class Batman
 public notNice
 {
 
 public class SuperMan {
+}
+internal static class WonderWoman { 
 
-internal static class WonderWoman {  }
+    class WonderGirl {}
+
+}
+
+interface SpiderMan {
+
+}
+
 ";
 
-
+            // ACT
             var res = CodeUtility.GetCodeMetaData(data);
+
+            // ASSERT
+            Assert.NotNull(res);
+            Assert.NotNull(res.Classes);
+            Assert.Equal(3, res.Classes.Count());
+
+            var wonderWoman = res.Classes.SingleOrDefault(c => c.ClassName == "WonderWoman");
+            Assert.NotNull(wonderWoman);
+            Assert.Single(wonderWoman.Classes);
+
+            Assert.Single(res.Interfaces);
+
+            Assert.Single(res.Enums);
+            Assert.Equal("ElectronicNum", res.Enums.Single().EnumName);
 
         }
 
