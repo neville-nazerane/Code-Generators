@@ -34,7 +34,7 @@ namespace CodeGeneratorHelpers.Core.Models
         public Task WriteAllTextToFileAsync(string filePath, string rawText)
             => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
 
-        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache)
+        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache = true)
         {
             if (!(useCache && FileMetaCache.TryGetValue(filePath, out var metadata)))
             {
