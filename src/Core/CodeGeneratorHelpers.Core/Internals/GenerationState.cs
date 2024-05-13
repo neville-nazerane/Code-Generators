@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CodeGeneratorHelpers.Core.Models;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +14,8 @@ namespace CodeGeneratorHelpers.Core.Internals
         public string RootFullPath { get; init; }
 
         public string GenerationFullPath { get; init; }
+
+        internal readonly ConcurrentDictionary<string, CodeMetadata> _fileMetaCache = [];
 
     }
 }

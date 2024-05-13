@@ -16,11 +16,11 @@ namespace CodeGeneratorHelpers.Core.Models
 
         private readonly SemaphoreSlim _filesReadLock = new(1, 1);
 
-        private readonly Dictionary<string, CodeMetadata> _fileMetaCache = new();
-
         public string RootFullPath => _generationState.RootFullPath;
 
         public string GenerationFullPath => _generationState.GenerationFullPath;
+
+        private ConcurrentDictionary<string, CodeMetadata> FileMetaCache => _generationState._fileMetaCache;
 
         internal GenerationContext(IFileService fileService, GenerationState generationState)
         {
@@ -34,11 +34,15 @@ namespace CodeGeneratorHelpers.Core.Models
         public Task WriteAllTextToFileAsync(string filePath, string rawText)
             => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
 
-        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath)
+        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache)
         {
-            string fullFilePath = GetFullPath(filePath);
-            var text = await _fileService.ReadAllTextAsync(fullFilePath);
-            return CodeUtility.GetCodeMetaData(text, filePath);
+            if (!(useCache && FileMetaCache.TryGetValue(filePath, out var metadata)))
+            {
+                string fullFilePath = GetFullPath(filePath);
+                var text = await _fileService.ReadAllTextAsync(fullFilePath);
+                metadata = CodeUtility.GetCodeMetaData(text, filePath);
+            }
+            return metadata;
         }
 
         private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
@@ -54,9 +58,9 @@ namespace CodeGeneratorHelpers.Core.Models
             {
                 var path = GetFullPath(folderPath);
 
-                var filePaths = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
-                                         .Where(f => !f.StartsWith(GenerationFullPath, StringComparison.OrdinalIgnoreCase))
-                                         .ToArray();
+                var filePaths = _fileService.EnumerateFiles(path, "*")
+                                             .Where(f => !f.StartsWith(GenerationFullPath, StringComparison.OrdinalIgnoreCase))
+                                             .ToArray();
 
                 var chunks = filePaths.Chunk(maxDegreeOfParallelism);
 
@@ -66,8 +70,8 @@ namespace CodeGeneratorHelpers.Core.Models
 
                     var tasks = chunk.Select(f => Task.Run(async () =>
                     {
-                        if (!(useCache && !_fileMetaCache.TryGetValue(f, out var metaData)))
-                            metaData = await ReadMetadataFromFileAsync(f);
+                        if (!(useCache && !FileMetaCache.TryGetValue(f, out var metaData)))
+                            metaData = await ReadMetadataFromFileAsync(f, false);
 
                         allMetaData.Add(metaData);
                         if (action is not null)
@@ -78,8 +82,8 @@ namespace CodeGeneratorHelpers.Core.Models
 
                     if (useCache)
                         foreach (var metaData in allMetaData)
-                            if (!_fileMetaCache.ContainsKey(metaData.SourceFilePath))
-                                _fileMetaCache[metaData.SourceFilePath] = metaData;
+                            if (!FileMetaCache.ContainsKey(metaData.SourceFilePath))
+                                FileMetaCache[metaData.SourceFilePath] = metaData;
 
                     yield return allMetaData.ToArray();
                 }

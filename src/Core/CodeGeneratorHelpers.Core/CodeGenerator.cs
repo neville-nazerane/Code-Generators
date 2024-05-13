@@ -54,7 +54,7 @@ namespace CodeGeneratorHelpers.Core
         /// Key: folder name or pattern
         /// Value: Process to be executed for each file in folder
         /// </summary>
-        public List<KeyValuePair<string, Func<GenerationFileContext, Task>>> ProcessesForFilesInFolder { get; }
+        public List<ProcessForAllFilesRequest> ProcessesForFilesInFolder { get; }
 
         internal CodeGenerator(IFileService fileService)
         {
@@ -122,18 +122,10 @@ namespace CodeGeneratorHelpers.Core
             return this;
         }
 
-        /// <summary>
-        /// Add a process to run on each file on a folder
-        /// </summary>
-        /// <param name="pattern">Pattern of folder. For instance: '*ViewModels'</param>
-        /// <param name="process">Process to execute on each file in folder(s) that match the key</param>
-        /// <returns></returns>
-        public CodeGenerator AddProcessForEachFileInFolder(string pattern, Func<GenerationContext, Task> process)
-        {
-            ProcessesForFilesInFolder.Add(new(pattern, process));
-            return this;
-        }
+        //public CodeGenerator AddProcessForEachAllFiles()
+        //{
 
+        //}
 
         /// <summary>
         /// Get the full path of the target app based on the target app path set

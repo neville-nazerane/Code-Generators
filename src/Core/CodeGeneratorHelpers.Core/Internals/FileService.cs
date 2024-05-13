@@ -25,5 +25,8 @@ namespace CodeGeneratorHelpers.Core.Internals
 
         public Task WriteAllTextAsync(string path, string text) => File.WriteAllTextAsync(path, text);
 
+        public IEnumerable<string> EnumerateFiles(string path, string searchPattern)
+            => Directory.EnumerateFiles(path, searchPattern, SearchOption.AllDirectories);
+
     }
 }
