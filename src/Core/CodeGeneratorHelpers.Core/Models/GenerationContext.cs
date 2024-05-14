@@ -51,9 +51,6 @@ namespace CodeGeneratorHelpers.Core.Models
                                                                                                     bool useCache = true)
         {
 
-            if (useCache)
-                await _filesReadLock.WaitAsync();
-
             try
             {
                 var path = GetFullPath(folderPath);
@@ -88,11 +85,6 @@ namespace CodeGeneratorHelpers.Core.Models
                     yield return allMetaData.ToArray();
                 }
 
-            }
-            finally
-            {
-                if (useCache)
-                    _filesReadLock.Release();
             }
         }
 

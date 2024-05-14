@@ -1,6 +1,7 @@
 ﻿using CodeGeneratorHelpers.Core.Internals;
 using CodeGeneratorHelpers.Core.Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,40 +12,107 @@ namespace CodeGeneratorHelpers.Core
     public partial class CodeGenerator
     {
 
+        private ConcurrentDictionary<string, CodeMetadata> FileMetaCache => _state._fileMetaCache;
 
-        public async Task<CodeGenerator> RunAsync()
+        public Task<string> ReadTextInFileAsync(string filePath)
+            => _fileService.ReadAllTextAsync(GetFullPath(filePath));
+
+        public Task WriteAllTextToFileAsync(string filePath, string rawText)
+            => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
+
+        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache = true)
         {
-            var fullTargetPath = GetFullTargetAppPath();
-
-            // TODO handle /\
-            var generationPath = _fileService.Combine(fullTargetPath, GenerationDestinationPath);
-
-            // clean up generation path
-            if (_fileService.DirectoryExists(generationPath) && ClearGenerationDestinationPath)
-                _fileService.DeleteDirectory(generationPath, true);
-            
-            _fileService.CreateDirectory(generationPath);
-
-            var chunks = Processes.Chunk(MaxDegreeOfParallelism);
-
-            var state = new GenerationState
+            if (!(useCache && FileMetaCache.TryGetValue(filePath, out var metadata)))
             {
-                RootFullPath = fullTargetPath,
-                GenerationFullPath = generationPath
-            };
-
-            foreach (var chunk in chunks)
-            {
-                var tasks = chunk.Select(async c =>
-                {
-                    var context = new GenerationContext(null, null);
-                    await c(null);
-                }).ToArray();
-                await Task.WhenAll(tasks);
+                string fullFilePath = GetFullPath(filePath);
+                var text = await _fileService.ReadAllTextAsync(fullFilePath);
+                metadata = CodeUtility.GetCodeMetaData(text, filePath);
             }
-
-            return this;
+            return metadata;
         }
+
+        private string GetFullPath(string filePath)
+            => filePath is null ? FullAppTargetPath : _fileService.Combine(FullAppTargetPath, filePath);
+
+        private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
+                                                                                            int maxDegreeOfParallelism = 10,
+                                                                                            Func<CodeMetadata, Task> action = null,
+                                                                                            bool useCache = true)
+        {
+
+            try
+            {
+                var path = GetFullPath(folderPath);
+
+                var filePaths = _fileService.EnumerateFiles(path, "*")
+                                             .Where(f => !f.StartsWith(GenerationFullPath, StringComparison.OrdinalIgnoreCase))
+                                             .ToArray();
+
+                var chunks = filePaths.Chunk(maxDegreeOfParallelism);
+
+                foreach (var chunk in chunks)
+                {
+                    var allMetaData = new ConcurrentBag<CodeMetadata>();
+
+                    var tasks = chunk.Select(f => Task.Run(async () =>
+                    {
+                        if (!(useCache && !FileMetaCache.TryGetValue(f, out var metaData)))
+                            metaData = await ReadMetadataFromFileAsync(f, false);
+
+                        allMetaData.Add(metaData);
+                        if (action is not null)
+                            await action(metaData);
+                    }));
+
+                    await Task.WhenAll(tasks);
+
+                    if (useCache)
+                        foreach (var metaData in allMetaData)
+                            if (!FileMetaCache.ContainsKey(metaData.SourceFilePath))
+                                FileMetaCache[metaData.SourceFilePath] = metaData;
+
+                    yield return allMetaData.ToArray();
+                }
+
+            }
+        }
+
+
+
+
+        //public async Task<CodeGenerator> RunAsync()
+        //{
+        //    var fullTargetPath = GetFullTargetAppPath();
+
+        //    // TODO handle /\
+        //    var generationPath = _fileService.Combine(fullTargetPath, GenerationDestinationPath);
+
+        //    // clean up generation path
+        //    if (_fileService.DirectoryExists(generationPath) && ClearGenerationDestinationPath)
+        //        _fileService.DeleteDirectory(generationPath, true);
+
+        //    _fileService.CreateDirectory(generationPath);
+
+        //    var chunks = Processes.Chunk(MaxDegreeOfParallelism);
+
+        //    var state = new GenerationState
+        //    {
+        //        RootFullPath = fullTargetPath,
+        //        GenerationFullPath = generationPath
+        //    };
+
+        //    foreach (var chunk in chunks)
+        //    {
+        //        var tasks = chunk.Select(async c =>
+        //        {
+        //            var context = new GenerationContext(null, null);
+        //            await c(null);
+        //        }).ToArray();
+        //        await Task.WhenAll(tasks);
+        //    }
+
+        //    return this;
+        //}
 
     }
 }

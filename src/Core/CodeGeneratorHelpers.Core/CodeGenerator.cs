@@ -16,11 +16,13 @@ namespace CodeGeneratorHelpers.Core
     {
 
         private readonly IFileService _fileService;
+        private readonly GenerationState _state;
+
 
         /// <summary>
         /// Path of target app to generate code on
         /// </summary>
-        public string TargetAppPath { get; set; }
+        public string TargetAppPath { get; }
 
         /// <summary>
         /// 
@@ -28,13 +30,13 @@ namespace CodeGeneratorHelpers.Core
         /// 
         /// Default: "Generated"
         /// </summary>
-        public string GenerationDestinationPath { get; set; } = "Generated";
+        public string GenerationDestinationPath { get; }
 
         /// <summary>
         /// Maximum number of processes that can to run parallel
         /// Defaults: 5
         /// </summary>
-        public int MaxDegreeOfParallelism { get; set; } = 5;
+        public int MaxDegreeOfParallelism { get; }
 
         /// <summary>
         /// 
@@ -42,97 +44,48 @@ namespace CodeGeneratorHelpers.Core
         /// Default: false
         /// 
         /// </summary>
-        public bool ClearGenerationDestinationPath { get; set; }
+        public bool ClearGenerationDestinationPath { get; }
 
-        /// <summary>
-        /// Processes to execute
-        /// </summary>
-        public List<Func<GenerationContext, Task>> Processes { get; }
-        
-        /// <summary>
-        /// Key value pairs for processes to run on all files of folders
-        /// Key: folder name or pattern
-        /// Value: Process to be executed for each file in folder
-        /// </summary>
-        public List<ProcessForAllFilesRequest> ProcessesForFilesInFolder { get; }
+        public string FullAppTargetPath => _state.RootFullPath;
 
-        internal CodeGenerator(IFileService fileService)
+        public string FullGenerationDestinationPath => _state.GenerationFullPath;
+
+        internal CodeGenerator(IFileService fileService,
+                               string targetAppPath,
+                               string generationDestinationPath = "Generated",
+                               int maxDegreeOfParallelism = 10,
+                               bool clearGenerationDestinationPath = false)
         {
             _fileService = fileService;
-            Processes = [];
-            ProcessesForFilesInFolder = [];
-        }
-
-        public CodeGenerator() : this(new FileService()) { }
-
-        /// <summary>
-        /// 
-        /// Empty contents of GenerationDestinationPath before generation processes begin
-        /// Default: false
-        /// 
-        /// </summary>
-        /// <param name="clear"></param>
-        /// <returns></returns>
-        public CodeGenerator EnsureGenerationDestinationPathCleared(bool clear = true)
-        {
-            ClearGenerationDestinationPath = clear;
-            return this;
-        }
-
-        /// <summary>
-        /// Path of target app to generate code on
-        /// </summary>
-        public CodeGenerator SetTargetAppPath(string path)
-        {
-            TargetAppPath = path;
-            return this;
-        }
-
-        /// <summary>
-        /// 
-        /// Path within the target app to place generated files by default
-        /// 
-        /// Default: "Generated"
-        /// </summary>
-        public CodeGenerator SetGeneratedFilesPath(string path)
-        {
-            GenerationDestinationPath = path;
-            return this;
-        }
-
-        /// <summary>
-        /// Set maximum number of processes that can to run parallel
-        /// </summary>
-        /// <param name="maxDegreeOfParallelism"></param>
-        /// <returns></returns>
-        public CodeGenerator SetMaxDegreeOfParallelism(int maxDegreeOfParallelism)
-        {
+            TargetAppPath = targetAppPath;
+            GenerationDestinationPath = generationDestinationPath;
             MaxDegreeOfParallelism = maxDegreeOfParallelism;
-            return this;
+            ClearGenerationDestinationPath = clearGenerationDestinationPath;
+
+            var targetPath = GetFullTargetAppPath();
+            _state = new GenerationState
+            {
+                GenerationFullPath = _fileService.Combine(targetPath, GenerationDestinationPath),
+                RootFullPath = targetPath
+            };
         }
 
-        /// <summary>
-        /// Add a process to be executed during generation
-        /// </summary>
-        /// <param name="process"></param>
-        /// <returns></returns>
-        public CodeGenerator AddProcess(Func<GenerationContext, Task> process)
-        {
-            Processes.Add(process);
-            return this;
-        }
-
-        //public CodeGenerator AddProcessForEachAllFiles()
-        //{
-
-        //}
+        public static CodeGenerator Create(string targetAppPath,
+                                         string generationDestinationPath = "Generated",
+                                         int maxDegreeOfParallelism = 10,
+                                         bool clearGenerationDestinationPath = false) 
+            => new(new FileService(),
+                   targetAppPath,
+                   generationDestinationPath,
+                   maxDegreeOfParallelism,
+                   clearGenerationDestinationPath);
 
         /// <summary>
         /// Get the full path of the target app based on the target app path set
         /// </summary>
         /// <returns></returns>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public string GetFullTargetAppPath()
+        private string GetFullTargetAppPath()
         {
             char[] dirSeparators = ['/', '\\'];
 
@@ -156,7 +109,6 @@ namespace CodeGeneratorHelpers.Core
             throw new DirectoryNotFoundException(
                 $"Failed to find app path. Tried {string.Join('\n', triedPaths.Select(t => $"'{t}'").ToArray())}");
         }
-
 
     }
 }

@@ -13,12 +13,10 @@ namespace CodeGeneratorHelpers.Core.Tests
     {
 
         readonly Mock<IFileService> _mockedFileService;
-        readonly CodeGenerator _codeGenerator;
 
         public CodeGenerator_GetFullTargetAppPathTests()
         {
             _mockedFileService = new();
-            _codeGenerator = new CodeGenerator(_mockedFileService.Object);
         }
 
         [Fact]
@@ -39,10 +37,10 @@ namespace CodeGeneratorHelpers.Core.Tests
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
 
-            _codeGenerator.TargetAppPath = "myproject";
+            var codeGenerator = new CodeGenerator(_mockedFileService.Object, "myproject");
 
             // ACT
-            var res = _codeGenerator.GetFullTargetAppPath();
+            var res = codeGenerator.FullAppTargetPath;
 
             // ASSERT
             Assert.Equal(Path.GetFullPath(currentPath), Path.GetFullPath(res));
@@ -66,10 +64,10 @@ namespace CodeGeneratorHelpers.Core.Tests
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
 
-            _codeGenerator.TargetAppPath = "C:/data/code/myproject";
+            var codeGenerator = new CodeGenerator(_mockedFileService.Object, "C:/data/code/myproject");
 
             // ACT
-            var res = _codeGenerator.GetFullTargetAppPath();
+            var res = codeGenerator.FullAppTargetPath;
 
             // ASSERT
             Assert.Equal(Path.GetFullPath(currentPath), Path.GetFullPath(res));
@@ -93,10 +91,10 @@ namespace CodeGeneratorHelpers.Core.Tests
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
 
-            _codeGenerator.TargetAppPath = "C:/data/code/myproject";
+            var codeGenerator = new CodeGenerator(_mockedFileService.Object, "C:/data/code/myproject");
 
             // ACT
-            var res = _codeGenerator.GetFullTargetAppPath();
+            var res = codeGenerator.FullAppTargetPath;
 
             // ASSERT
             Assert.Equal(Path.GetFullPath("C:/data/code/myproject"), Path.GetFullPath(res));
@@ -120,10 +118,8 @@ namespace CodeGeneratorHelpers.Core.Tests
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
 
-            _codeGenerator.TargetAppPath = "notmyproject";
-
             // ACT & ASSERT
-            Assert.Throws<DirectoryNotFoundException>(_codeGenerator.GetFullTargetAppPath);
+            Assert.Throws<DirectoryNotFoundException>(() => new CodeGenerator(_mockedFileService.Object, "notmyproject"));
 
         }
 
@@ -145,10 +141,10 @@ namespace CodeGeneratorHelpers.Core.Tests
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
 
-            _codeGenerator.TargetAppPath = "code";
+            var codeGenerator = new CodeGenerator(_mockedFileService.Object, "code");
 
             // ACT
-            var res = _codeGenerator.GetFullTargetAppPath();
+            var res = codeGenerator.FullAppTargetPath;
 
             // ASSERT
             Assert.Equal(Path.GetFullPath("C:/data/code"), Path.GetFullPath(res));
@@ -174,10 +170,10 @@ namespace CodeGeneratorHelpers.Core.Tests
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
 
-            _codeGenerator.TargetAppPath = "src/realProject";
+            var codeGenerator = new CodeGenerator(_mockedFileService.Object, "src/realProject");
 
             // ACT
-            var res = _codeGenerator.GetFullTargetAppPath();
+            var res = codeGenerator.FullAppTargetPath;
 
             // ASSERT
             Assert.Equal(Path.GetFullPath("C:/data/src/realProject"), Path.GetFullPath(res));
