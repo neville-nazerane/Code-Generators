@@ -115,9 +115,6 @@ namespace CodeGeneratorHelpers.Core
 
         }
 
-
-
-
         //public async Task<CodeGenerator> RunAsync()
         //{
         //    var fullTargetPath = GetFullTargetAppPath();
