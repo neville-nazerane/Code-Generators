@@ -33,12 +33,6 @@ namespace CodeGeneratorHelpers.Core
         public string GenerationDestinationPath { get; }
 
         /// <summary>
-        /// Maximum number of processes that can to run parallel
-        /// Defaults: 5
-        /// </summary>
-        public int MaxDegreeOfParallelism { get; }
-
-        /// <summary>
         /// 
         /// If true, contents of GenerationDestinationPath would be emptied before generation processes begin
         /// Default: false
@@ -53,13 +47,11 @@ namespace CodeGeneratorHelpers.Core
         internal CodeGenerator(IFileService fileService,
                                string targetAppPath,
                                string generationDestinationPath = "Generated",
-                               int maxDegreeOfParallelism = 10,
                                bool clearGenerationDestinationPath = false)
         {
             _fileService = fileService;
             TargetAppPath = targetAppPath;
             GenerationDestinationPath = generationDestinationPath;
-            MaxDegreeOfParallelism = maxDegreeOfParallelism;
             ClearGenerationDestinationPath = clearGenerationDestinationPath;
 
             var targetPath = GetFullTargetAppPath();
@@ -72,12 +64,10 @@ namespace CodeGeneratorHelpers.Core
 
         public static CodeGenerator Create(string targetAppPath,
                                          string generationDestinationPath = "Generated",
-                                         int maxDegreeOfParallelism = 10,
                                          bool clearGenerationDestinationPath = false) 
             => new(new FileService(),
                    targetAppPath,
                    generationDestinationPath,
-                   maxDegreeOfParallelism,
                    clearGenerationDestinationPath);
 
         /// <summary>

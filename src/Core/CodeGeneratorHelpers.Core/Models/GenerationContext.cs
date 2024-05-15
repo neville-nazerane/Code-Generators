@@ -11,85 +11,94 @@ namespace CodeGeneratorHelpers.Core.Models
     public class GenerationContext
     {
 
-        private readonly IFileService _fileService;
-        private readonly GenerationState _generationState;
+        private readonly GenerationState _state;
 
-        private readonly SemaphoreSlim _filesReadLock = new(1, 1);
+        public string FileName { get; init; }
 
-        public string RootFullPath => _generationState.RootFullPath;
-
-        public string GenerationFullPath => _generationState.GenerationFullPath;
-
-        private ConcurrentDictionary<string, CodeMetadata> FileMetaCache => _generationState._fileMetaCache;
-
-        internal GenerationContext(IFileService fileService, GenerationState generationState)
+        internal GenerationContext(GenerationState state)
         {
-            _fileService = fileService;
-            _generationState = generationState;
+            _state = state;
         }
 
-        public Task<string> ReadTextInFileAsync(string filePath)
-            => _fileService.ReadAllTextAsync(GetFullPath(filePath));
+        //private readonly IFileService _fileService;
+        //private readonly GenerationState _generationState;
 
-        public Task WriteAllTextToFileAsync(string filePath, string rawText)
-            => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
+        //private readonly SemaphoreSlim _filesReadLock = new(1, 1);
 
-        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache = true)
-        {
-            if (!(useCache && FileMetaCache.TryGetValue(filePath, out var metadata)))
-            {
-                string fullFilePath = GetFullPath(filePath);
-                var text = await _fileService.ReadAllTextAsync(fullFilePath);
-                metadata = CodeUtility.GetCodeMetaData(text, filePath);
-            }
-            return metadata;
-        }
+        //public string RootFullPath => _generationState.RootFullPath;
 
-        private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
-                                                                                                    int maxDegreeOfParallelism = 10,
-                                                                                                    Func<CodeMetadata, Task> action = null,
-                                                                                                    bool useCache = true)
-        {
+        //public string GenerationFullPath => _generationState.GenerationFullPath;
 
-            try
-            {
-                var path = GetFullPath(folderPath);
+        //private ConcurrentDictionary<string, CodeMetadata> FileMetaCache => _generationState._fileMetaCache;
 
-                var filePaths = _fileService.EnumerateFiles(path, "*")
-                                             .Where(f => !f.StartsWith(GenerationFullPath, StringComparison.OrdinalIgnoreCase))
-                                             .ToArray();
+        //internal GenerationContext(IFileService fileService, GenerationState generationState)
+        //{
+        //    _fileService = fileService;
+        //    _generationState = generationState;
+        //}
 
-                var chunks = filePaths.Chunk(maxDegreeOfParallelism);
+        //public Task<string> ReadTextInFileAsync(string filePath)
+        //    => _fileService.ReadAllTextAsync(GetFullPath(filePath));
 
-                foreach (var chunk in chunks)
-                {
-                    var allMetaData = new ConcurrentBag<CodeMetadata>();
+        //public Task WriteAllTextToFileAsync(string filePath, string rawText)
+        //    => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
 
-                    var tasks = chunk.Select(f => Task.Run(async () =>
-                    {
-                        if (!(useCache && !FileMetaCache.TryGetValue(f, out var metaData)))
-                            metaData = await ReadMetadataFromFileAsync(f, false);
+        //public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache = true)
+        //{
+        //    if (!(useCache && FileMetaCache.TryGetValue(filePath, out var metadata)))
+        //    {
+        //        string fullFilePath = GetFullPath(filePath);
+        //        var text = await _fileService.ReadAllTextAsync(fullFilePath);
+        //        metadata = CodeUtility.GetCodeMetaData(text, filePath);
+        //    }
+        //    return metadata;
+        //}
 
-                        allMetaData.Add(metaData);
-                        if (action is not null)
-                            await action(metaData);
-                    }));
+        //private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
+        //                                                                                            int maxDegreeOfParallelism = 10,
+        //                                                                                            Func<CodeMetadata, Task> action = null,
+        //                                                                                            bool useCache = true)
+        //{
 
-                    await Task.WhenAll(tasks);
+        //    try
+        //    {
+        //        var path = GetFullPath(folderPath);
 
-                    if (useCache)
-                        foreach (var metaData in allMetaData)
-                            if (!FileMetaCache.ContainsKey(metaData.SourceFilePath))
-                                FileMetaCache[metaData.SourceFilePath] = metaData;
+        //        var filePaths = _fileService.EnumerateFiles(path, "*")
+        //                                     .Where(f => !f.StartsWith(GenerationFullPath, StringComparison.OrdinalIgnoreCase))
+        //                                     .ToArray();
 
-                    yield return allMetaData.ToArray();
-                }
+        //        var chunks = filePaths.Chunk(maxDegreeOfParallelism);
 
-            }
-        }
+        //        foreach (var chunk in chunks)
+        //        {
+        //            var allMetaData = new ConcurrentBag<CodeMetadata>();
 
-        private string GetFullPath(string filePath)
-            => filePath is null ? RootFullPath : _fileService.Combine(RootFullPath, filePath);
+        //            var tasks = chunk.Select(f => Task.Run(async () =>
+        //            {
+        //                if (!(useCache && !FileMetaCache.TryGetValue(f, out var metaData)))
+        //                    metaData = await ReadMetadataFromFileAsync(f, false);
+
+        //                allMetaData.Add(metaData);
+        //                if (action is not null)
+        //                    await action(metaData);
+        //            }));
+
+        //            await Task.WhenAll(tasks);
+
+        //            if (useCache)
+        //                foreach (var metaData in allMetaData)
+        //                    if (!FileMetaCache.ContainsKey(metaData.SourceFilePath))
+        //                        FileMetaCache[metaData.SourceFilePath] = metaData;
+
+        //            yield return allMetaData.ToArray();
+        //        }
+
+        //    }
+        //}
+
+        //private string GetFullPath(string filePath)
+        //    => filePath is null ? RootFullPath : _fileService.Combine(RootFullPath, filePath);
 
     }
 }
