@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace CodeGeneratorHelpers.Core.Internals
 {
@@ -39,14 +40,23 @@ namespace CodeGeneratorHelpers.Core.Internals
 
             var parentClass = metaModel as ClassMetaData;
 
+            metaModel.Classes = [];
+            metaModel.Interfaces = [];
+            metaModel.Enums = [];
+
             var classes = new List<ClassMetaData>();
             var interfaces = new List<InterfaceMetaData>();
             var enums = new List<EnumMetaData>();
 
+
             foreach (var node in rootNode.ChildNodes())
             {
+                var type = node.GetType();
                 switch (node)
                 {
+                    case NamespaceDeclarationSyntax _:
+                        FillUpMetaData(node, metaModel, sourceFilePath);
+                        break;
                     case ClassDeclarationSyntax classSyntax:
                         var classMeta = new ClassMetaData
                         {
@@ -78,9 +88,9 @@ namespace CodeGeneratorHelpers.Core.Internals
                 }
             }
 
-            metaModel.Classes = classes;
-            metaModel.Interfaces = interfaces;
-            metaModel.Enums = enums;
+            metaModel.Classes = metaModel.Classes.Union(classes).ToArray();
+            metaModel.Interfaces = metaModel.Interfaces.Union(interfaces).ToArray();
+            metaModel.Enums = metaModel.Enums.Union(enums).ToArray();
         }
 
         #endregion

@@ -18,7 +18,7 @@ namespace CodeGeneratorHelpers.Core
             => _fileService.ReadAllTextAsync(GetFullPath(filePath));
 
         public Task WriteAllTextToFileAsync(string filePath, string rawText)
-            => _fileService.WriteAllTextAsync(GetFullPath(filePath), rawText);
+            => _fileService.WriteAllTextAsync(GetFullPath(filePath, FullGenerationDestinationPath), rawText);
 
         public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache = true)
         {
@@ -31,8 +31,11 @@ namespace CodeGeneratorHelpers.Core
             return metadata;
         }
 
-        private string GetFullPath(string filePath)
-            => filePath is null ? FullAppTargetPath : _fileService.Combine(FullAppTargetPath, filePath);
+        private string GetFullPath(string filePath, string basePath = null)
+        {
+            if (basePath is null) basePath = FullAppTargetPath;
+            return filePath is null ? basePath : _fileService.Combine(basePath, filePath);
+        }
 
         public async Task ExecuteOnEachFileAsync(string folderPath = null,
                                                  string filePattern = "**/*.cs",
@@ -95,7 +98,7 @@ namespace CodeGeneratorHelpers.Core
 
                 var tasks = chunk.Select(f => Task.Run(async () =>
                 {
-                    if (!(useCache && !FileMetaCache.TryGetValue(f, out var metaData)))
+                    if (!(useCache && FileMetaCache.TryGetValue(f, out var metaData)))
                         metaData = await ReadMetadataFromFileAsync(f, false);
 
                     allMetaData.Add(metaData);

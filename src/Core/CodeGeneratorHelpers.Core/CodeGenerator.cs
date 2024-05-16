@@ -60,6 +60,10 @@ namespace CodeGeneratorHelpers.Core
                 GenerationFullPath = _fileService.Combine(targetPath, GenerationDestinationPath),
                 RootFullPath = targetPath
             };
+
+            if (_fileService.DirectoryExists(FullGenerationDestinationPath)) 
+                _fileService.DeleteDirectory(FullGenerationDestinationPath, true);
+            _fileService.CreateDirectory(FullGenerationDestinationPath);
         }
 
         public static CodeGenerator Create(string targetAppPath,
