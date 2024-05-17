@@ -8,9 +8,9 @@ namespace CodeGeneratorHelpers.Core.Models
 {
     public class ClassMetadata : CodeMetadata, ICodeItem
     {
-        public string ClassName { get; init; }
+        public string Name { get; internal set; }
 
-        public ClassMetadata ParentClass { get; init; }
+        public ClassMetadata ParentClass { get; internal set; }
 
         public IEnumerable<PropertyMetadata> Properties { get; internal set; }
 

@@ -64,7 +64,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                     case InterfaceDeclarationSyntax interfaceSyntax:
                         interfaces.Add(new()
                         {
-                            InterfaceName = interfaceSyntax.Identifier.Text,
+                            Name = interfaceSyntax.Identifier.Text,
                             ParentClass = parentClass,
                             SourceFilePath = sourceFilePath
                         });
@@ -73,7 +73,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                     case EnumDeclarationSyntax enumSyntax:
                         enums.Add(new()
                         {
-                            EnumName = enumSyntax.Identifier.Text,
+                            Name = enumSyntax.Identifier.Text,
                             ParentClass = parentClass,
                             SourceFilePath = sourceFilePath
                         });
@@ -94,7 +94,7 @@ namespace CodeGeneratorHelpers.Core.Internals
 
             var classMeta = new ClassMetadata
             {
-                ClassName = classSyntax.Identifier.Text,
+                Name = classSyntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
             };
@@ -127,7 +127,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                                                     ClassMetadata ParentClass)
             => new()
             {
-                PropertyName = syntax.Identifier.Text,
+                Name = syntax.Identifier.Text,
                 ParentClass = ParentClass,
                 SourceFilePath = sourceFilePath
             };

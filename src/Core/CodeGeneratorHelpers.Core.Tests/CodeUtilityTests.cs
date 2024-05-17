@@ -56,16 +56,16 @@ interface SpiderMan {
             Assert.NotNull(res.Classes);
             Assert.Equal(3, res.Classes.Count());
 
-            var wonderWoman = res.Classes.SingleOrDefault(c => c.ClassName == "WonderWoman");
+            var wonderWoman = res.Classes.SingleOrDefault(c => c.Name == "WonderWoman");
             Assert.NotNull(wonderWoman);
             Assert.Single(wonderWoman.Classes);
 
             Assert.Single(res.Interfaces);
 
             Assert.Single(res.Enums);
-            Assert.Equal("ElectronicNum", res.Enums.Single().EnumName);
+            Assert.Equal("ElectronicNum", res.Enums.Single().Name);
 
-            var spiderMan = res.Classes.SingleOrDefault(c => c.ClassName == "SuperMan");
+            var spiderMan = res.Classes.SingleOrDefault(c => c.Name == "SuperMan");
             Assert.NotNull(spiderMan);
             Assert.NotNull(spiderMan.Properties);
             Assert.Equal(3, spiderMan.Properties.Count());

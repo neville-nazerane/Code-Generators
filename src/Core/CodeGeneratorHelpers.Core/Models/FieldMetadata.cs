@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Core.Models
 {
-    public class PropertyMetadata : ICodeItem
+    public class FieldMetadata : ICodeItem
     {
 
         public string Name { get; internal set; }

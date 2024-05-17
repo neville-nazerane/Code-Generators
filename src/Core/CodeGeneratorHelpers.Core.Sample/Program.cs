@@ -11,9 +11,9 @@ await generator.ExecuteOnEachFileAsync("models", filePattern: "*Data.cs", execut
 
 async Task PrintModelsAsync(CodeMetadata metadata)
 {
-    string className = metadata?.Classes?.FirstOrDefault()?.ClassName ?? string.Empty;
-    string interfaceName = metadata?.Interfaces?.FirstOrDefault()?.InterfaceName ?? string.Empty;
-    string enumName = metadata?.Enums?.FirstOrDefault()?.EnumName ?? string.Empty;
+    string className = metadata?.Classes?.FirstOrDefault()?.Name ?? string.Empty;
+    string interfaceName = metadata?.Interfaces?.FirstOrDefault()?.Name ?? string.Empty;
+    string enumName = metadata?.Enums?.FirstOrDefault()?.Name ?? string.Empty;
 
     if (className.Length + interfaceName.Length > 0)
     {
