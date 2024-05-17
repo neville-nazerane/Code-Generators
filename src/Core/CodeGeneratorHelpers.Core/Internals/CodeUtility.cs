@@ -92,6 +92,14 @@ namespace CodeGeneratorHelpers.Core.Internals
                                                  SyntaxNode node)
         {
 
+            var classMeta = new ClassMetadata
+            {
+                ClassName = classSyntax.Identifier.Text,
+                ParentClass = parentClass,
+                SourceFilePath = sourceFilePath,
+            };
+
+
             var properties = new List<PropertyMetadata>();
 
             foreach (var member in classSyntax.Members)
@@ -99,18 +107,16 @@ namespace CodeGeneratorHelpers.Core.Internals
                 switch (member)
                 {
                     case PropertyDeclarationSyntax propertyDeclarationSyntax:
-                        properties.Add(GetMetadata(propertyDeclarationSyntax, sourceFilePath, parentClass));
+                        properties.Add(GetMetadata(propertyDeclarationSyntax, sourceFilePath, classMeta));
                         break;
                 }
             }
 
-            var classMeta = new ClassMetadata
-            {
-                ClassName = classSyntax.Identifier.Text,
-                ParentClass = parentClass,
-                SourceFilePath = sourceFilePath,
-                Properties = [.. properties]
-            };
+            classMeta.Properties = [.. properties];
+
+
+            foreach (var p in properties)
+                p.ParentClass = classMeta;
 
             FillUpMetaData(node, classMeta, sourceFilePath);
             return classMeta;

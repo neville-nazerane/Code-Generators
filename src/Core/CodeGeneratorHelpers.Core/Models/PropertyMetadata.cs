@@ -9,10 +9,11 @@ namespace CodeGeneratorHelpers.Core.Models
     public class PropertyMetadata : ICodeItem
     {
 
-        public string PropertyName { get; set; }
+        public string PropertyName { get; internal set; }
 
-        public ClassMetadata ParentClass { get; init; }
-        public string SourceFilePath { get; init; }
+        public ClassMetadata ParentClass { get; internal set; }
+
+        public string SourceFilePath { get; internal set; }
 
     }
 }

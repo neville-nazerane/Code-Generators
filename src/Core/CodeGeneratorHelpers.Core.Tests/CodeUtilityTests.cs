@@ -1,6 +1,7 @@
 ﻿using CodeGeneratorHelpers.Core.Internals;
 using System;
 using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,12 @@ public notNice
 {
 
 public class SuperMan {
+
+        public string PropertyName { get; set; }
+
+        public ClassMetadata ParentClass { get; init; }
+        public string SourceFilePath { get; init; }
+
 }
 internal static class WonderWoman { 
 
@@ -42,7 +49,7 @@ interface SpiderMan {
 ";
 
             // ACT
-            var res = CodeUtility.GetCodeMetaData(data);
+            var res = CodeUtility.GetCodeMetaData(data, "file.txt");
 
             // ASSERT
             Assert.NotNull(res);
@@ -57,6 +64,12 @@ interface SpiderMan {
 
             Assert.Single(res.Enums);
             Assert.Equal("ElectronicNum", res.Enums.Single().EnumName);
+
+            var spiderMan = res.Classes.SingleOrDefault(c => c.ClassName == "SuperMan");
+            Assert.NotNull(spiderMan);
+            Assert.NotNull(spiderMan.Properties);
+            Assert.Equal(3, spiderMan.Properties.Count());
+            Assert.NotNull(spiderMan.Properties.First().ParentClass);
 
         }
 
