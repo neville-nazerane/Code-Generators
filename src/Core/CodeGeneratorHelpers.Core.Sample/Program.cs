@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 var generator = CodeGenerator.Create("CodeGeneratorHelpers.Core");
 
 
-await generator.ExecuteOnEachFileAsync("models", filePattern: "*", execution: PrintModelsAsync);
+await generator.ExecuteOnEachFileAsync("models", filePattern: "*Data.cs", execution: PrintModelsAsync);
 
 
 async Task PrintModelsAsync(CodeMetadata metadata)
