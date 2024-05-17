@@ -33,7 +33,7 @@ namespace CodeGeneratorHelpers.Core
 
         private string GetFullPath(string filePath, string basePath = null)
         {
-            if (basePath is null) basePath = FullAppTargetPath;
+            basePath ??= FullAppTargetPath;
             return filePath is null ? basePath : _fileService.Combine(basePath, filePath);
         }
 

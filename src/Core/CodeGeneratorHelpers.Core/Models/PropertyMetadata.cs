@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Core.Models
 {
-    public class InterfaceMetadata : ICodeItem
+    public class PropertyMetadata : ICodeItem
     {
 
-        public string InterfaceName { get; init; }
+        public string PropertyName { get; set; }
 
         public ClassMetadata ParentClass { get; init; }
         public string SourceFilePath { get; init; }

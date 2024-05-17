@@ -9,7 +9,7 @@ namespace CodeGeneratorHelpers.Core.Models
     public interface ICodeItem
     {
 
-        public ClassMetaData ParentClass { get; }
+        public ClassMetadata ParentClass { get; }
 
         public string SourceFilePath { get; }
 

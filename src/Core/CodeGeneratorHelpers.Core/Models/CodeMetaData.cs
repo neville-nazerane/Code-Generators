@@ -11,9 +11,9 @@ namespace CodeGeneratorHelpers.Core.Models
 
         public string SourceFilePath { get; init; }
 
-        public IEnumerable<ClassMetaData> Classes { get; internal set; }
-        public IEnumerable<InterfaceMetaData> Interfaces { get; internal set; }
-        public IEnumerable<EnumMetaData> Enums { get; internal set; }
+        public IEnumerable<ClassMetadata> Classes { get; internal set; }
+        public IEnumerable<InterfaceMetadata> Interfaces { get; internal set; }
+        public IEnumerable<EnumMetadata> Enums { get; internal set; }
 
     }
 }

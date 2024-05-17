@@ -38,33 +38,26 @@ namespace CodeGeneratorHelpers.Core.Internals
                                            string sourceFilePath)
         {
 
-            var parentClass = metaModel as ClassMetaData;
+            var parentClass = metaModel as ClassMetadata;
 
             metaModel.Classes = [];
             metaModel.Interfaces = [];
             metaModel.Enums = [];
 
-            var classes = new List<ClassMetaData>();
-            var interfaces = new List<InterfaceMetaData>();
-            var enums = new List<EnumMetaData>();
+            var classes = new List<ClassMetadata>();
+            var interfaces = new List<InterfaceMetadata>();
+            var enums = new List<EnumMetadata>();
 
 
             foreach (var node in rootNode.ChildNodes())
             {
-                var type = node.GetType();
                 switch (node)
                 {
                     case NamespaceDeclarationSyntax _:
                         FillUpMetaData(node, metaModel, sourceFilePath);
                         break;
                     case ClassDeclarationSyntax classSyntax:
-                        var classMeta = new ClassMetaData
-                        {
-                            ClassName = classSyntax.Identifier.Text,
-                            ParentClass = parentClass,
-                            SourceFilePath = sourceFilePath
-                        };
-                        FillUpMetaData(node, classMeta, sourceFilePath);
+                        ClassMetadata classMeta = GetMetadata(classSyntax, sourceFilePath, parentClass, node);
                         classes.Add(classMeta);
                         break;
 
@@ -92,6 +85,46 @@ namespace CodeGeneratorHelpers.Core.Internals
             metaModel.Interfaces = metaModel.Interfaces.Union(interfaces).ToArray();
             metaModel.Enums = metaModel.Enums.Union(enums).ToArray();
         }
+
+        private static ClassMetadata GetMetadata(ClassDeclarationSyntax classSyntax, 
+                                                 string sourceFilePath,
+                                                 ClassMetadata parentClass,
+                                                 SyntaxNode node)
+        {
+
+            var properties = new List<PropertyMetadata>();
+
+            foreach (var member in classSyntax.Members)
+            {
+                switch (member)
+                {
+                    case PropertyDeclarationSyntax propertyDeclarationSyntax:
+                        properties.Add(GetMetadata(propertyDeclarationSyntax, sourceFilePath, parentClass));
+                        break;
+                }
+            }
+
+            var classMeta = new ClassMetadata
+            {
+                ClassName = classSyntax.Identifier.Text,
+                ParentClass = parentClass,
+                SourceFilePath = sourceFilePath,
+                Properties = [.. properties]
+            };
+
+            FillUpMetaData(node, classMeta, sourceFilePath);
+            return classMeta;
+        }
+
+        private static PropertyMetadata GetMetadata(PropertyDeclarationSyntax syntax,
+                                                    string sourceFilePath,
+                                                    ClassMetadata ParentClass)
+            => new()
+            {
+                PropertyName = syntax.Identifier.Text,
+                ParentClass = ParentClass,
+                SourceFilePath = sourceFilePath
+            };
 
         #endregion
     }

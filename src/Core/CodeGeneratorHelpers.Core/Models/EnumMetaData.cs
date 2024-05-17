@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Core.Models
 {
-    public class EnumMetaData : ICodeItem
+    public class EnumMetadata : ICodeItem
     {
 
         public string EnumName { get; init; }
 
-        public ClassMetaData ParentClass { get; init; }
+        public ClassMetadata ParentClass { get; init; }
         public string SourceFilePath { get; init; }
 
     }

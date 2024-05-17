@@ -61,7 +61,7 @@ namespace CodeGeneratorHelpers.Core
                 RootFullPath = targetPath
             };
 
-            if (_fileService.DirectoryExists(FullGenerationDestinationPath)) 
+            if (ClearGenerationDestinationPath && _fileService.DirectoryExists(FullGenerationDestinationPath)) 
                 _fileService.DeleteDirectory(FullGenerationDestinationPath, true);
             _fileService.CreateDirectory(FullGenerationDestinationPath);
         }
