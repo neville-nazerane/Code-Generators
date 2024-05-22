@@ -11,6 +11,8 @@ namespace CodeGeneratorHelpers.Core.Models
 
         public string Name { get; internal set; }
 
+        public TypeMetadata Type { get; set; }
+
         public ClassMetadata ParentClass { get; internal set; }
 
         public string SourceFilePath { get; internal set; }

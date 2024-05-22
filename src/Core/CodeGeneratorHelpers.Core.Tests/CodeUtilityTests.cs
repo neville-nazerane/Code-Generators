@@ -30,13 +30,21 @@ public notNice
 
 public class SuperMan {
 
+        Dictionary<int, string> mapping;
+
         public string PropertyName { get; set; }
 
         public ClassMetadata ParentClass { get; init; }
         public string SourceFilePath { get; init; }
 
 }
+
 internal static class WonderWoman { 
+
+    int abc, def, ghi;
+
+    string jkl;
+
 
     class WonderGirl {}
 

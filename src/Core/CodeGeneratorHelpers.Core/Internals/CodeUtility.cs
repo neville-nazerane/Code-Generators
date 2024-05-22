@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -86,7 +87,7 @@ namespace CodeGeneratorHelpers.Core.Internals
             metaModel.Enums = metaModel.Enums.Union(enums).ToArray();
         }
 
-        private static ClassMetadata GetMetadata(ClassDeclarationSyntax classSyntax, 
+        private static ClassMetadata GetMetadata(ClassDeclarationSyntax classSyntax,
                                                  string sourceFilePath,
                                                  ClassMetadata parentClass,
                                                  SyntaxNode node)
@@ -101,6 +102,7 @@ namespace CodeGeneratorHelpers.Core.Internals
 
 
             var properties = new List<PropertyMetadata>();
+            var fields = new List<FieldMetadata>();
 
             foreach (var member in classSyntax.Members)
             {
@@ -109,10 +111,14 @@ namespace CodeGeneratorHelpers.Core.Internals
                     case PropertyDeclarationSyntax propertyDeclarationSyntax:
                         properties.Add(GetMetadata(propertyDeclarationSyntax, sourceFilePath, classMeta));
                         break;
+                    case FieldDeclarationSyntax fieldDeclarationSyntax:
+                        fields.AddRange(GetMetadata(fieldDeclarationSyntax, sourceFilePath, classMeta));
+                        break;
                 }
             }
 
             classMeta.Properties = [.. properties];
+            classMeta.Fields = [.. fields];
 
 
             foreach (var p in properties)
@@ -131,6 +137,45 @@ namespace CodeGeneratorHelpers.Core.Internals
                 ParentClass = ParentClass,
                 SourceFilePath = sourceFilePath
             };
+
+        private static IEnumerable<FieldMetadata> GetMetadata(FieldDeclarationSyntax syntax,
+                                                              string sourceFilePath,
+                                                              ClassMetadata ParentClass)
+        {
+            var typeMeta = GetMetadata(syntax.Declaration.Type);
+
+            return syntax.Declaration
+                             .Variables
+                             .Select(v => new FieldMetadata()
+                             {
+                                 Name = v.Identifier.Text,
+                                 ParentClass = ParentClass,
+                                 SourceFilePath = sourceFilePath,
+                                 Type = typeMeta
+                             }).ToImmutableArray();
+        }
+
+        private static TypeMetadata GetMetadata(TypeSyntax type)
+        {
+            var res = new TypeMetadata();
+            switch (type)
+            {
+                case GenericNameSyntax genericName:
+                    res.IsGeneric = true;
+                    res.GenericArguments = genericName.TypeArgumentList.Arguments.Select(GetMetadata);
+                    res.IdentifierName = genericName.Identifier.Text;
+                    break;
+                case PredefinedTypeSyntax predefinedType:
+                    res.IsPredefinedType = true;
+                    res.Keyword = predefinedType.Keyword.Text;
+                    break;
+                case IdentifierNameSyntax identifierName:
+                    res.IdentifierName = identifierName.Identifier.Text;
+                    break;
+            }
+
+            return res;
+        }
 
         #endregion
     }

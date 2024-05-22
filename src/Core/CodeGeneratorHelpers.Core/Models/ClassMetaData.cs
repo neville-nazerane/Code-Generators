@@ -13,6 +13,7 @@ namespace CodeGeneratorHelpers.Core.Models
         public ClassMetadata ParentClass { get; internal set; }
 
         public IEnumerable<PropertyMetadata> Properties { get; internal set; }
+        public IEnumerable<FieldMetadata> Fields { get; internal set; }
 
     }
 }
