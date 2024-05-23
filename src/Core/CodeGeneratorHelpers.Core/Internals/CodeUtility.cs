@@ -105,6 +105,7 @@ namespace CodeGeneratorHelpers.Core.Internals
 
             var properties = new List<PropertyMetadata>();
             var fields = new List<FieldMetadata>();
+            var methods = new List<MethodMetadata>();
 
             foreach (var member in classSyntax.Members)
             {
@@ -116,11 +117,15 @@ namespace CodeGeneratorHelpers.Core.Internals
                     case FieldDeclarationSyntax fieldDeclarationSyntax:
                         fields.AddRange(GetMetadata(fieldDeclarationSyntax, sourceFilePath, classMeta));
                         break;
+                    case MethodDeclarationSyntax methodDeclarationSyntax:
+                        methods.Add(GetMetadata(methodDeclarationSyntax, sourceFilePath, classMeta));
+                        break;
                 }
             }
 
             classMeta.Properties = [.. properties];
             classMeta.Fields = [.. fields];
+            classMeta.Methods = [.. methods];
 
 
             foreach (var p in properties)
@@ -140,6 +145,30 @@ namespace CodeGeneratorHelpers.Core.Internals
                 SourceFilePath = sourceFilePath,
                 Attributes = GetMetadata(syntax.AttributeLists)
             };
+
+        private static MethodMetadata GetMetadata(MethodDeclarationSyntax syntax,
+                                                  string sourceFilePath,
+                                                  ClassMetadata ParentClass)
+            => new()
+            {
+                Name = syntax.Identifier.Text,
+                ParentClass = ParentClass,
+                SourceFilePath = sourceFilePath,
+                Attributes = GetMetadata(syntax.AttributeLists),
+                Parameters = GetMetadata(syntax.ParameterList)
+            };
+
+        private static IEnumerable<ParameterMetadata> GetMetadata(ParameterListSyntax parameters)
+        {
+            var res = parameters.Parameters.Select(p => new ParameterMetadata
+            {
+                Name = p.Identifier.Text,
+                Attributes = GetMetadata(p.AttributeLists),
+                Type = GetMetadata(p.Type)
+            }).ToImmutableArray();
+
+            return res;
+        }
 
         private static IEnumerable<FieldMetadata> GetMetadata(FieldDeclarationSyntax syntax,
                                                               string sourceFilePath,
