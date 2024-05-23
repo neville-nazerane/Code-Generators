@@ -99,6 +99,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Name = classSyntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
+                Attributes = GetMetadata(classSyntax.AttributeLists)
             };
 
 
@@ -136,7 +137,8 @@ namespace CodeGeneratorHelpers.Core.Internals
             {
                 Name = syntax.Identifier.Text,
                 ParentClass = ParentClass,
-                SourceFilePath = sourceFilePath
+                SourceFilePath = sourceFilePath,
+                Attributes = GetMetadata(syntax.AttributeLists)
             };
 
         private static IEnumerable<FieldMetadata> GetMetadata(FieldDeclarationSyntax syntax,

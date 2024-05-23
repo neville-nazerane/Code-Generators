@@ -14,6 +14,6 @@ namespace CodeGeneratorHelpers.Core.Models
 
         public IEnumerable<PropertyMetadata> Properties { get; internal set; }
         public IEnumerable<FieldMetadata> Fields { get; internal set; }
-
+        public IEnumerable<AttributeMetadata> Attributes { get; internal set; }
     }
 }
