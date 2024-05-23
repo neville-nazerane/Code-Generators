@@ -16,6 +16,6 @@ namespace CodeGeneratorHelpers.Core.Models
         public ClassMetadata ParentClass { get; internal set; }
 
         public string SourceFilePath { get; internal set; }
-
+        public IEnumerable<AttributeMetadata> Attributes { get; internal set; }
     }
 }

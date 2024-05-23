@@ -43,6 +43,8 @@ internal static class WonderWoman {
 
     int abc, def, ghi;
 
+    [Hello(23, 21), hi]
+    [Bye]
     string jkl;
 
 

@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -142,8 +143,9 @@ namespace CodeGeneratorHelpers.Core.Internals
                                                               string sourceFilePath,
                                                               ClassMetadata ParentClass)
         {
-            var typeMeta = GetMetadata(syntax.Declaration.Type);
 
+            var typeMeta = GetMetadata(syntax.Declaration.Type);
+            var attributes = GetMetadata(syntax.AttributeLists);
             return syntax.Declaration
                              .Variables
                              .Select(v => new FieldMetadata()
@@ -151,8 +153,22 @@ namespace CodeGeneratorHelpers.Core.Internals
                                  Name = v.Identifier.Text,
                                  ParentClass = ParentClass,
                                  SourceFilePath = sourceFilePath,
-                                 Type = typeMeta
+                                 Type = typeMeta,
+                                 Attributes = attributes
                              }).ToImmutableArray();
+        }
+
+        private static IEnumerable<AttributeMetadata> GetMetadata(SyntaxList<AttributeListSyntax> attributes)
+        {
+            var all = attributes.SelectMany(a => a.Attributes)
+                                .Select(a => new AttributeMetadata
+                                {
+                                    Name = a.Name.ToString(),
+                                    ArgumentValues = a.ArgumentList?.Arguments.Select(a => a.Expression.ToString()).ToImmutableArray()
+                                })
+                                .ToImmutableArray();
+
+            return all;
         }
 
         private static TypeMetadata GetMetadata(TypeSyntax type)
@@ -162,7 +178,7 @@ namespace CodeGeneratorHelpers.Core.Internals
             {
                 case GenericNameSyntax genericName:
                     res.IsGeneric = true;
-                    res.GenericArguments = genericName.TypeArgumentList.Arguments.Select(GetMetadata);
+                    res.GenericArguments = genericName.TypeArgumentList.Arguments.Select(GetMetadata).ToImmutableArray();
                     res.IdentifierName = genericName.Identifier.Text;
                     break;
                 case PredefinedTypeSyntax predefinedType:

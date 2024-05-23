@@ -7,13 +7,9 @@ using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Core.Models
 {
-    public class TypeMetadata : ICodeItem
+    public class TypeMetadata
     {
         public string Name { get; internal set; }
-
-        public ClassMetadata ParentClass { get; internal set; }
-
-        public string SourceFilePath { get; internal set; }
 
         public bool IsNamedType { get; internal set; }
 
