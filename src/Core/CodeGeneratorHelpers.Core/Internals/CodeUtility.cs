@@ -29,7 +29,7 @@ namespace CodeGeneratorHelpers.Core.Internals
             var tree = CSharpSyntaxTree.ParseText(rawCode);
             var root = (CompilationUnitSyntax)tree.GetRoot();
 
-            FillUpMetaData(root, metaData, sourceFilePath);
+            FillUpMetaData(root, metaData, null, sourceFilePath);
 
             return metaData;
         }
@@ -38,6 +38,7 @@ namespace CodeGeneratorHelpers.Core.Internals
 
         private static void FillUpMetaData(SyntaxNode rootNode,
                                            CodeMetadata metaModel,
+                                           string namespaceName,
                                            string sourceFilePath)
         {
 
@@ -56,19 +57,19 @@ namespace CodeGeneratorHelpers.Core.Internals
             {
                 switch (node)
                 {
-                    case NamespaceDeclarationSyntax _:
-                        FillUpMetaData(node, metaModel, sourceFilePath);
+                    case NamespaceDeclarationSyntax namespaceSyntax:
+                        FillUpMetaData(node, metaModel, namespaceSyntax.Name.ToString(), sourceFilePath);
                         break;
                     case ClassDeclarationSyntax classSyntax:
-                        classes.Add(GetMetadata(classSyntax, sourceFilePath, parentClass, node));
+                        classes.Add(GetMetadata(classSyntax, sourceFilePath, namespaceName, parentClass, node));
                         break;
 
                     case InterfaceDeclarationSyntax interfaceSyntax:
-                        interfaces.Add(GetMetadata(sourceFilePath, parentClass, interfaceSyntax));
+                        interfaces.Add(GetMetadata(interfaceSyntax, sourceFilePath, namespaceName, parentClass));
                         break;
 
                     case EnumDeclarationSyntax enumSyntax:
-                        enums.Add(GetMetaData(enumSyntax, sourceFilePath, parentClass));
+                        enums.Add(GetMetaData(enumSyntax, sourceFilePath, namespaceName, parentClass));
                         break;
                 }
             }
@@ -80,33 +81,35 @@ namespace CodeGeneratorHelpers.Core.Internals
 
         private static EnumMetadata GetMetaData(EnumDeclarationSyntax enumSyntax,
                                                 string sourceFilePath,
+                                                string namespaceName,
                                                 ClassMetadata parentClass)
             => new()
             {
                 Name = enumSyntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
+                Namespace = namespaceName,
                 Attributes = GetMetadata(enumSyntax.AttributeLists),
                 Modifiers = GetModifiers(enumSyntax.Modifiers)
             };
 
-        private static InterfaceMetadata GetMetadata(string sourceFilePath,
-                                                     ClassMetadata parentClass,
-                                                     InterfaceDeclarationSyntax interfaceSyntax)
+        private static InterfaceMetadata GetMetadata(InterfaceDeclarationSyntax interfaceSyntax,
+                                                     string sourceFilePath,
+                                                     string namespaceName,
+                                                     ClassMetadata parentClass)
             => new()
             {
                 Name = interfaceSyntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
+                Namespace = namespaceName,
                 Attributes = GetMetadata(interfaceSyntax.AttributeLists),
                 Modifiers = GetModifiers(interfaceSyntax.Modifiers)
             };
-
-        private static IEnumerable<string> GetModifiers(SyntaxTokenList list)
-            => list.Select(l => l.Text).ToImmutableArray();
-
+ 
         private static ClassMetadata GetMetadata(ClassDeclarationSyntax classSyntax,
                                                  string sourceFilePath,
+                                                 string namespaceName,
                                                  ClassMetadata parentClass,
                                                  SyntaxNode node)
         {
@@ -116,6 +119,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Name = classSyntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
+                Namespace = namespaceName,
                 Modifiers = GetModifiers(classSyntax.Modifiers),
                 Attributes = GetMetadata(classSyntax.AttributeLists)
             };
@@ -148,7 +152,7 @@ namespace CodeGeneratorHelpers.Core.Internals
             foreach (var p in properties)
                 p.ParentClass = classMeta;
 
-            FillUpMetaData(node, classMeta, sourceFilePath);
+            FillUpMetaData(node, classMeta, namespaceName, sourceFilePath);
             return classMeta;
         }
 
@@ -245,6 +249,9 @@ namespace CodeGeneratorHelpers.Core.Internals
 
             return res;
         }
+
+        private static IEnumerable<string> GetModifiers(SyntaxTokenList list)
+            => list.Select(l => l.Text).ToImmutableArray();
 
         #endregion
     }
