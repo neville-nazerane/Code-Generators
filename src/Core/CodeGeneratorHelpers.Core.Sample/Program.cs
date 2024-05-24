@@ -3,10 +3,12 @@ using CodeGeneratorHelpers.Core.Models;
 using Microsoft.CodeAnalysis;
 
 
-var generator = CodeGenerator.Create("CodeGeneratorHelpers.Core");
+var generator = CodeGenerator.Create("CodeGeneratorHelpers.Core", clearGenerationDestinationPath: true);
 
 
-await generator.ExecuteOnEachFileAsync("models", filePattern: "*Data.cs", execution: PrintModelsAsync);
+await generator.ExecuteOnEachFileAsync("models",
+                                       filePattern: "*metadata.cs",
+                                       execution: PrintModelsAsync);
 
 
 async Task PrintModelsAsync(CodeMetadata metadata)
@@ -22,7 +24,7 @@ async Task PrintModelsAsync(CodeMetadata metadata)
     Interface: {interfaceName}
     Enum: {enumName}";
 
-        var name = new FileInfo(metadata.SourceFilePath).Name;
+        var name = new FileInfo(metadata.SourceFilePath).Name[..^3];
 
         await generator.WriteAllTextToFileAsync($"{name}.txt", text);
     }
