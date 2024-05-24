@@ -60,26 +60,15 @@ namespace CodeGeneratorHelpers.Core.Internals
                         FillUpMetaData(node, metaModel, sourceFilePath);
                         break;
                     case ClassDeclarationSyntax classSyntax:
-                        ClassMetadata classMeta = GetMetadata(classSyntax, sourceFilePath, parentClass, node);
-                        classes.Add(classMeta);
+                        classes.Add(GetMetadata(classSyntax, sourceFilePath, parentClass, node));
                         break;
 
                     case InterfaceDeclarationSyntax interfaceSyntax:
-                        interfaces.Add(new()
-                        {
-                            Name = interfaceSyntax.Identifier.Text,
-                            ParentClass = parentClass,
-                            SourceFilePath = sourceFilePath
-                        });
+                        interfaces.Add(GetMetadata(sourceFilePath, parentClass, interfaceSyntax));
                         break;
 
                     case EnumDeclarationSyntax enumSyntax:
-                        enums.Add(new()
-                        {
-                            Name = enumSyntax.Identifier.Text,
-                            ParentClass = parentClass,
-                            SourceFilePath = sourceFilePath
-                        });
+                        enums.Add(GetMetaData(enumSyntax, sourceFilePath, parentClass));
                         break;
                 }
             }
@@ -88,6 +77,33 @@ namespace CodeGeneratorHelpers.Core.Internals
             metaModel.Interfaces = metaModel.Interfaces.Union(interfaces).ToArray();
             metaModel.Enums = metaModel.Enums.Union(enums).ToArray();
         }
+
+        private static EnumMetadata GetMetaData(EnumDeclarationSyntax enumSyntax,
+                                                string sourceFilePath,
+                                                ClassMetadata parentClass)
+            => new()
+            {
+                Name = enumSyntax.Identifier.Text,
+                ParentClass = parentClass,
+                SourceFilePath = sourceFilePath,
+                Attributes = GetMetadata(enumSyntax.AttributeLists),
+                Modifiers = GetModifiers(enumSyntax.Modifiers)
+            };
+
+        private static InterfaceMetadata GetMetadata(string sourceFilePath,
+                                                     ClassMetadata parentClass,
+                                                     InterfaceDeclarationSyntax interfaceSyntax)
+            => new()
+            {
+                Name = interfaceSyntax.Identifier.Text,
+                ParentClass = parentClass,
+                SourceFilePath = sourceFilePath,
+                Attributes = GetMetadata(interfaceSyntax.AttributeLists),
+                Modifiers = GetModifiers(interfaceSyntax.Modifiers)
+            };
+
+        private static IEnumerable<string> GetModifiers(SyntaxTokenList list)
+            => list.Select(l => l.Text).ToImmutableArray();
 
         private static ClassMetadata GetMetadata(ClassDeclarationSyntax classSyntax,
                                                  string sourceFilePath,
@@ -100,9 +116,9 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Name = classSyntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
+                Modifiers = GetModifiers(classSyntax.Modifiers),
                 Attributes = GetMetadata(classSyntax.AttributeLists)
             };
-
 
             var properties = new List<PropertyMetadata>();
             var fields = new List<FieldMetadata>();
@@ -145,7 +161,8 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Name = syntax.Identifier.Text,
                 ParentClass = ParentClass,
                 SourceFilePath = sourceFilePath,
-                Attributes = GetMetadata(syntax.AttributeLists)
+                Attributes = GetMetadata(syntax.AttributeLists),
+                Modifiers = GetModifiers(syntax.Modifiers)
             };
 
         private static MethodMetadata GetMetadata(MethodDeclarationSyntax syntax,
@@ -158,6 +175,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 SourceFilePath = sourceFilePath,
                 ReturnType = GetMetadata(syntax.ReturnType),
                 Attributes = GetMetadata(syntax.AttributeLists),
+                Modifiers = GetModifiers(syntax.Modifiers),
                 Parameters = GetMetadata(syntax.ParameterList)
             };
 
@@ -188,7 +206,8 @@ namespace CodeGeneratorHelpers.Core.Internals
                                  ParentClass = ParentClass,
                                  SourceFilePath = sourceFilePath,
                                  Type = typeMeta,
-                                 Attributes = attributes
+                                 Attributes = attributes,
+                                 Modifiers = GetModifiers(syntax.Modifiers),
                              }).ToImmutableArray();
         }
 
