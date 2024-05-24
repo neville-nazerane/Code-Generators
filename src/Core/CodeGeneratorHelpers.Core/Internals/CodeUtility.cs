@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -135,6 +136,7 @@ namespace CodeGeneratorHelpers.Core.Internals
             return classMeta;
         }
 
+
         private static PropertyMetadata GetMetadata(PropertyDeclarationSyntax syntax,
                                                     string sourceFilePath,
                                                     ClassMetadata ParentClass)
@@ -154,6 +156,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Name = syntax.Identifier.Text,
                 ParentClass = ParentClass,
                 SourceFilePath = sourceFilePath,
+                ReturnType = GetMetadata(syntax.ReturnType),
                 Attributes = GetMetadata(syntax.AttributeLists),
                 Parameters = GetMetadata(syntax.ParameterList)
             };

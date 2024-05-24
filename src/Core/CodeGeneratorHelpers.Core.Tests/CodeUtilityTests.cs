@@ -37,6 +37,13 @@ public class SuperMan {
         public ClassMetadata ParentClass { get; init; }
         public string SourceFilePath { get; init; }
 
+        private void SampleFunction1(int i, string str)
+        {
+
+        }
+
+        public string Function2(string str, bool b) => str;
+
 }
 
 internal static class WonderWoman { 
@@ -75,11 +82,11 @@ interface SpiderMan {
             Assert.Single(res.Enums);
             Assert.Equal("ElectronicNum", res.Enums.Single().Name);
 
-            var spiderMan = res.Classes.SingleOrDefault(c => c.Name == "SuperMan");
-            Assert.NotNull(spiderMan);
-            Assert.NotNull(spiderMan.Properties);
-            Assert.Equal(3, spiderMan.Properties.Count());
-            Assert.NotNull(spiderMan.Properties.First().ParentClass);
+            var superman = res.Classes.SingleOrDefault(c => c.Name == "SuperMan");
+            Assert.NotNull(superman);
+            Assert.NotNull(superman.Properties);
+            Assert.Equal(3, superman.Properties.Count());
+            Assert.NotNull(superman.Properties.First().ParentClass);
 
         }
 
