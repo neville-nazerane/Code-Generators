@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MauiSingleProectSample;
+using Microsoft.Extensions.Logging;
 
-namespace MauiSingleProectSample
+namespace MauiSingleProjectSample
 {
     public static class MauiProgram
     {
@@ -16,7 +17,7 @@ namespace MauiSingleProectSample
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();

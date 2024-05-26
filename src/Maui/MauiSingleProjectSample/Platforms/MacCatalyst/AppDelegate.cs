@@ -1,6 +1,7 @@
 ﻿using Foundation;
+using MauiSingleProjectSample;
 
-namespace MauiSingleProectSample
+namespace MauiSingleProjectSample.Platforms.MacCatalyst
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

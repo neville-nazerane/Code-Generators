@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\CodeGeneratorHelpers.Core\CodeGeneratorHelpers.Core.csproj" />
+  </ItemGroup>
+
 </Project>
