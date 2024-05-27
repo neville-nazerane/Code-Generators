@@ -44,7 +44,7 @@ namespace CodeGeneratorHelpers.Maui
 
         public async Task GenerateAsync()
         {
-            var generator = CodeGenerator.Create(_targetAppPath, _generationFolder);
+            var generator = CodeGenerator.Create(_targetAppPath, _generationFolder, true);
 
             var viewModels = new Dictionary<string, ClassMetadata>();
             var pages = new Dictionary<string, ClassMetadata>();
@@ -113,7 +113,7 @@ public partial class {page.Name}
 
 ";
 
-            await generator.WriteAllTextToFileAsync($"{page.Name}.generated.cs", code);
+            await generator.WriteAllTextToFileAsync($"{page.Name}.g.cs", code);
 
         }
 
