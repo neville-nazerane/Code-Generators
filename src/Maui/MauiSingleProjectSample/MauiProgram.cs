@@ -1,5 +1,6 @@
 ﻿using MauiSingleProjectSample;
 using Microsoft.Extensions.Logging;
+using SampleNamespace;
 
 namespace MauiSingleProjectSample
 {
@@ -19,6 +20,8 @@ namespace MauiSingleProjectSample
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddGeneratedInjections();
 
             return builder.Build();
         }
