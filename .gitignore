@@ -397,3 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 /src/Core/CodeGeneratorHelpers.Core/Generated
+/src/Maui/MauiSingleProjectSample/Generated
