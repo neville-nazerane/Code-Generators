@@ -1,2 +1,8 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using CodeGeneratorHelpers.Maui;
+
+
+
+await new MauiCodeGenerationBuilder()
+                   .SetTargetAppPath("MauiSingleProjectSample")
+                   
+                   .GenerateAsync();

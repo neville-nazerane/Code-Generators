@@ -49,7 +49,7 @@ namespace CodeGeneratorHelpers.Core
 
         public IAsyncEnumerable<IEnumerable<CodeMetadata>> GetFilesMetaInBatchesAsync(string folderPath = null,
                                                                                       string filePattern = "*.cs",
-                                                                                      int batchSize = 10,
+                                                                                      int batchSize = 20,
                                                                                       bool useCache = true) 
             => InternalReadAllFilesMetaDataAsync(folderPath, filePattern, batchSize, null, useCache);
 
@@ -65,7 +65,7 @@ namespace CodeGeneratorHelpers.Core
 
         public async Task<IEnumerable<CodeMetadata>> GetAllFileMetaAsync(string folderPath = null,
                                                                          string filePattern = "*.cs",
-                                                                         int maxDegreeOfParallelism = 10,
+                                                                         int maxDegreeOfParallelism = 20,
                                                                         bool useCache = true)
         {
             var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, null, useCache);

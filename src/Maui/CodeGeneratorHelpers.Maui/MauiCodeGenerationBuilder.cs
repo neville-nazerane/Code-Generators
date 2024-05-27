@@ -1,17 +1,92 @@
-﻿using System;
+﻿using CodeGeneratorHelpers.Core;
+using CodeGeneratorHelpers.Core.Models;
+using CodeGeneratorHelpers.Maui.InternalUtils;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CodeGeneratorHelpers.Maui
 {
-    public class MauiCodeGenerationBuilder
+    public partial class MauiCodeGenerationBuilder
     {
 
+        private string _targetAppPath;
+        private string _generationFolder = "Generated";
+        private Regex _pageRegex = DefaultPageRegex();
+        private Regex _viewModelRegex = DefaultViewModelRegex();
+
+        #region Regex
+
+        [GeneratedRegex(@"(.*)(Page|View)")]
+        private static partial Regex DefaultPageRegex();
+
+        [GeneratedRegex(@"(.*)(PageModel|ViewModel)")]
+        private static partial Regex DefaultViewModelRegex();
+
+        #endregion
+
+        public MauiCodeGenerationBuilder SetTargetAppPath(string path)
+        {
+            _targetAppPath = path;
+            return this;
+        }
+
+        public MauiCodeGenerationBuilder SetGenerationFolder(string path)
+        {
+            _generationFolder = path;
+            return this;
+        }
 
 
-        public Task GenerateAsync() => Task.CompletedTask;
+        public async Task GenerateAsync()
+        {
+            var generator = CodeGenerator.Create(_targetAppPath, _generationFolder);
+
+            var viewModels = new Dictionary<string, CodeMetadata>();
+            var pages = new Dictionary<string, CodeMetadata>();
+
+            // Fetch pages and viewmodel metadata
+            await foreach (var code in generator.GetFilesMetaInBatchesAsync())
+            {
+                var classes = code.SelectMany(code => code.Classes);
+
+                foreach (var cls in classes)
+                {
+                    var viewModelMatch = _viewModelRegex.Match(cls.Name);
+                    if (viewModelMatch.Success)
+                    {
+                        var pageName = viewModelMatch.Groups[1].Value;
+                        viewModels[pageName] = cls;
+                    }
+                    else
+                    {
+                        var pageMatch = _pageRegex.Match(cls.Name);
+                        if (pageMatch.Success)
+                        {
+                            var pageName = pageMatch.Groups[1].Value;
+                            pages[pageName] = cls;
+                        }
+                    }
+
+                }
+
+            }
+
+
+
+        }
+
+        private async Task GenerateForPage(string name,
+                                           CodeMetadata page,
+                                           CodeMetadata viewModel)
+        {
+            
+        }
+
 
     }
 }
