@@ -46,8 +46,8 @@ namespace CodeGeneratorHelpers.Maui
         {
             var generator = CodeGenerator.Create(_targetAppPath, _generationFolder);
 
-            var viewModels = new Dictionary<string, CodeMetadata>();
-            var pages = new Dictionary<string, CodeMetadata>();
+            var viewModels = new Dictionary<string, ClassMetadata>();
+            var pages = new Dictionary<string, ClassMetadata>();
 
             // Fetch pages and viewmodel metadata
             await foreach (var code in generator.GetFilesMetaInBatchesAsync())
@@ -76,15 +76,45 @@ namespace CodeGeneratorHelpers.Maui
 
             }
 
+            var chunks = pages.Chunk(10);
 
+            foreach (var chunk in chunks)
+            {
+                var tasks = chunk.Select(async page =>
+                {
+                    if (viewModels.TryGetValue(page.Key, out var viewModelCode))
+                        await GenerateForPageAsync(generator, page.Key, page.Value, viewModelCode);
+                });
+
+                await Task.WhenAll(tasks);
+            }
 
         }
 
-        private async Task GenerateForPage(string name,
-                                           CodeMetadata page,
-                                           CodeMetadata viewModel)
+        private async Task GenerateForPageAsync(CodeGenerator generator,
+                                               string name,
+                                               ClassMetadata page,
+                                               ClassMetadata viewModel)
         {
-            
+
+            var code = $@"
+
+namespace {page.Namespace};
+
+public partial class {page.Name} 
+{{
+
+
+// HELLO WORLD
+
+
+
+}}
+
+";
+
+            await generator.WriteAllTextToFileAsync($"{page.Name}.generated.cs", code);
+
         }
 
 

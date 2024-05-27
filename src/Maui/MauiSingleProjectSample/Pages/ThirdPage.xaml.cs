@@ -1,4 +1,4 @@
-namespace MauiSingleProectSample.Pages;
+namespace MauiSingleProjectSample.Pages;
 
 public partial class ThirdPage : ContentPage
 {

@@ -1,4 +1,4 @@
-﻿namespace MauiSingleProectSample
+﻿namespace MauiSingleProjectSample
 {
     public partial class App : Application
     {

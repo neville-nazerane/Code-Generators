@@ -1,4 +1,4 @@
-﻿using MauiSingleProectSample;
+﻿using MauiSingleProjectSample;
 using Microsoft.Extensions.Logging;
 
 namespace MauiSingleProjectSample
