@@ -57,6 +57,9 @@ namespace CodeGeneratorHelpers.Core.Internals
             {
                 switch (node)
                 {
+                    case FileScopedNamespaceDeclarationSyntax fileScopedNamespaceSyntax:
+                        FillUpMetaData(node, metaModel, fileScopedNamespaceSyntax.Name.ToString(), sourceFilePath);
+                        break;
                     case NamespaceDeclarationSyntax namespaceSyntax:
                         FillUpMetaData(node, metaModel, namespaceSyntax.Name.ToString(), sourceFilePath);
                         break;
@@ -106,7 +109,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Attributes = GetMetadata(interfaceSyntax.AttributeLists),
                 Modifiers = GetModifiers(interfaceSyntax.Modifiers)
             };
- 
+
         private static ClassMetadata GetMetadata(ClassDeclarationSyntax classSyntax,
                                                  string sourceFilePath,
                                                  string namespaceName,
