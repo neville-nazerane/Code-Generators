@@ -76,6 +76,10 @@ namespace CodeGeneratorHelpers.Maui
 
             }
 
+            var utilClassCode = GenerateUtilClass(pages.Values, viewModels.Values, "SampleNamespace");
+
+            await generator.WriteAllTextToFileAsync("GenerationUtils.g.cs", utilClassCode);
+
             var chunks = pages.Chunk(10);
 
             foreach (var chunk in chunks)
