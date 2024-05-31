@@ -18,5 +18,7 @@ namespace CodeGeneratorHelpers.Core.Models
         public IEnumerable<MethodMetadata> Methods { get; internal set; }
         public IEnumerable<string> Modifiers { get; internal set; }
         public string Namespace { get; internal set; }
+        public IEnumerable<string> Usings { get; internal set; }
+        public IEnumerable<TypeMetadata> ImplementingTypes { get; internal set; }
     }
 }

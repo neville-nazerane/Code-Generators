@@ -15,5 +15,7 @@ namespace CodeGeneratorHelpers.Core.Models
         public IEnumerable<ParameterMetadata> Parameters { get; internal set; }
         public TypeMetadata ReturnType { get; internal set; }
         public IEnumerable<string> Modifiers { get; internal set; }
+        public IEnumerable<string> Usings { get; internal set; }
+
     }
 }

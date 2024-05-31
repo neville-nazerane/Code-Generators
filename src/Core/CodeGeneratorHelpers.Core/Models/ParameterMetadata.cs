@@ -12,5 +12,6 @@ namespace CodeGeneratorHelpers.Core.Models
         public string Name { get; internal set; }
         public IEnumerable<AttributeMetadata> Attributes { get; internal set; }
         public TypeMetadata Type { get; internal set; }
+        public string DefaultValue { get; internal set; }
     }
 }

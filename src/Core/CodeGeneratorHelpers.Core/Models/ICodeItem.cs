@@ -15,5 +15,7 @@ namespace CodeGeneratorHelpers.Core.Models
 
         public string SourceFilePath { get; }
 
+        public IEnumerable<string> Usings { get; }
+
     }
 }
