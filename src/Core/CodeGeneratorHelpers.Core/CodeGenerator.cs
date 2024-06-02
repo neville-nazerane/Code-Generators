@@ -67,8 +67,8 @@ namespace CodeGeneratorHelpers.Core
         }
 
         public static CodeGenerator Create(string targetAppPath,
-                                         string generationDestinationPath = "Generated",
-                                         bool clearGenerationDestinationPath = false) 
+                                           bool clearGenerationDestinationPath = false,
+                                         string generationDestinationPath = "Generated") 
             => new(new FileService(),
                    targetAppPath,
                    generationDestinationPath,
