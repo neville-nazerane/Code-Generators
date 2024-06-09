@@ -19,7 +19,6 @@ namespace CodeGeneratorHelpers.Core.Models
         public string Namespace { get; internal set; }
 
         public IEnumerable<string> Usings { get; internal set; }
-
-
+        public TypeMetadata Type { get; internal set; }
     }
 }

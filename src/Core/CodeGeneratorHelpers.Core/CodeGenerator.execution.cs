@@ -26,7 +26,7 @@ namespace CodeGeneratorHelpers.Core
             {
                 string fullFilePath = GetFullPath(filePath);
                 var text = await _fileService.ReadAllTextAsync(fullFilePath);
-                metadata = CodeUtility.GetCodeMetaData(text, filePath);
+                metadata = CodeUtility.GetCodeMetadata(text, filePath);
             }
             return metadata;
         }

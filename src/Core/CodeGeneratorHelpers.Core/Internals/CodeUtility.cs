@@ -19,7 +19,7 @@ namespace CodeGeneratorHelpers.Core.Internals
     internal partial class CodeUtility
     {
 
-        internal static CodeMetadata GetCodeMetaData(string rawCode, string sourceFilePath = null)
+        internal static CodeMetadata GetCodeMetadata(string rawCode, string sourceFilePath = null)
         {
             var metaData = new CodeMetadata
             {
@@ -183,6 +183,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Name = syntax.Identifier.Text,
                 ParentClass = ParentClass,
                 SourceFilePath = sourceFilePath,
+                Type = GetMetadata(syntax.Type),
                 Usings = usings,
                 Attributes = GetMetadata(syntax.AttributeLists),
                 Modifiers = GetModifiers(syntax.Modifiers)

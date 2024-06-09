@@ -12,7 +12,7 @@ namespace CodeGeneratorHelpers.Core
     {
 
         public static CodeMetadata GetCSharpCodeMetadata(this string rawCode, string sourceFilePath = null)
-            => CodeUtility.GetCodeMetaData(rawCode, sourceFilePath);
+            => CodeUtility.GetCodeMetadata(rawCode, sourceFilePath);
 
     }
 }
