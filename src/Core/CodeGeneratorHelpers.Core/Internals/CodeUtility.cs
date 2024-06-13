@@ -87,20 +87,35 @@ namespace CodeGeneratorHelpers.Core.Internals
             metaModel.Enums = metaModel.Enums.Union(enums).ToArray();
         }
 
-        private static EnumMetadata GetMetaData(EnumDeclarationSyntax enumSyntax,
+        private static EnumMetadata GetMetaData(EnumDeclarationSyntax syntax,
                                                 string sourceFilePath,
                                                 IEnumerable<string> usings,
                                                 string namespaceName,
                                                 ClassMetadata parentClass)
-            => new()
+        {
+            var res = new EnumMetadata
             {
-                Name = enumSyntax.Identifier.Text,
+                Name = syntax.Identifier.Text,
                 ParentClass = parentClass,
                 SourceFilePath = sourceFilePath,
                 Usings = usings,
                 Namespace = namespaceName,
-                Attributes = GetMetadata(enumSyntax.AttributeLists),
-                Modifiers = GetModifiers(enumSyntax.Modifiers)
+                Attributes = GetMetadata(syntax.AttributeLists),
+                Modifiers = GetModifiers(syntax.Modifiers)
+            };
+
+            res.Members = syntax.Members.Select(m => GetMetadata(m, sourceFilePath, res)).ToImmutableArray();
+            return res;
+        }
+
+        private static EnumMemberMetadata GetMetadata(EnumMemberDeclarationSyntax syntax,
+                                                      string sourceFilePath,
+                                                      EnumMetadata parentEnum)
+            => new()
+            {
+                Name = syntax.Identifier.Text,
+                SourceFilePath = sourceFilePath,
+                Value = syntax.EqualsValue?.Value is LiteralExpressionSyntax literal ? (int?)literal.Token.Value : null
             };
 
         private static InterfaceMetadata GetMetadata(InterfaceDeclarationSyntax interfaceSyntax,
@@ -127,7 +142,7 @@ namespace CodeGeneratorHelpers.Core.Internals
                                                  SyntaxNode node)
         {
 
-            var implementing = classSyntax.BaseList?.Types.Select(t => GetMetadata(t.Type)).ToImmutableArray();
+            var implementing = classSyntax.BaseList?.Types.Select(t => GetMetadata(t.Type)).ToImmutableArray() ?? [];
 
             var classMeta = new ClassMetadata
             {

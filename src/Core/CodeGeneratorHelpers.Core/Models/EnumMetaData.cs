@@ -14,6 +14,7 @@ namespace CodeGeneratorHelpers.Core.Models
         public ClassMetadata ParentClass { get; init; }
         public string SourceFilePath { get; init; }
         public IEnumerable<string> Modifiers { get; internal set; }
+        public IEnumerable<EnumMemberMetadata> Members { get; internal set; }
         public IEnumerable<AttributeMetadata> Attributes { get; internal set; }
         public string Namespace { get; internal set; }
         public IEnumerable<string> Usings { get; internal set; }
