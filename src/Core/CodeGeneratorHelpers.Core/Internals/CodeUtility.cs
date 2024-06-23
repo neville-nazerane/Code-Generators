@@ -194,9 +194,14 @@ namespace CodeGeneratorHelpers.Core.Internals
                                                     string sourceFilePath,
                                                     ClassMetadata ParentClass)
         {
-            var initializer = syntax.DescendantNodes()
-                                    .OfType<InvocationExpressionSyntax>()
-                                    .FirstOrDefault();
+            var nodes = syntax.DescendantNodes();
+
+            SyntaxNode initializer = nodes.OfType<InvocationExpressionSyntax>()
+                                                .FirstOrDefault();
+
+            if (initializer is null)
+                initializer = nodes.OfType<ArrowExpressionClauseSyntax>()
+                                                .FirstOrDefault();
 
 
             return new()
