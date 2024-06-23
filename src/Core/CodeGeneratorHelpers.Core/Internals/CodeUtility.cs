@@ -193,7 +193,13 @@ namespace CodeGeneratorHelpers.Core.Internals
                                                     IEnumerable<string> usings,
                                                     string sourceFilePath,
                                                     ClassMetadata ParentClass)
-            => new()
+        {
+            var initializer = syntax.DescendantNodes()
+                                    .OfType<InvocationExpressionSyntax>()
+                                    .FirstOrDefault();
+
+
+            return new()
             {
                 Name = syntax.Identifier.Text,
                 ParentClass = ParentClass,
@@ -201,8 +207,10 @@ namespace CodeGeneratorHelpers.Core.Internals
                 Type = GetMetadata(syntax.Type),
                 Usings = usings,
                 Attributes = GetMetadata(syntax.AttributeLists),
+                InitializerCode = initializer?.ToFullString(),
                 Modifiers = GetModifiers(syntax.Modifiers)
             };
+        }
 
         private static MethodMetadata GetMetadata(MethodDeclarationSyntax syntax,
                                                   IEnumerable<string> usings,
