@@ -73,13 +73,3 @@ stages:
           - script: rm -rf Packed
             workingDirectory: $(Pipeline.Workspace)
             displayName: Clean up
-
-
-
-          # - task: NuGetCommand@2
-          #   displayName: Internal nuget upload
-          #   inputs:
-          #     command: 'push'
-          #     packagesToPush: '$(Pipeline.Workspace)/Packed/*.nupkg'
-          #     nuGetFeedType: external
-          #     publishFeedCredentials: NuGet
