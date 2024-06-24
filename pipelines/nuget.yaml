@@ -1,0 +1,85 @@
+
+pool: hosted-linux
+
+pr: none
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - src/Core/CodeGeneratorHelpers.Core
+
+
+variables:
+  majorVersion: 0
+  minorVersion: 5
+
+parameters:
+  - name: projectNames
+    type: object
+    default:
+      - Core/CodeGeneratorHelpers.Core
+  
+
+name: $(majorVersion).$(minorVersion).$(Build.BuildId)
+
+stages:
+
+  - stage: Pack
+    displayName: Pack Nugets
+
+    jobs:
+
+      - job: Build
+
+        steps:
+          
+          - ${{ each project in parameters.projectNames }}:
+            - script: dotnet pack ${{ project }}
+                      -o $(Build.ArtifactStagingDirectory)/packed
+                      -c release
+                      -p:PackageVersion=$(Build.BuildNumber)
+              displayName: Packing ${{ project }}
+              workingDirectory: src
+
+          - publish: $(Build.ArtifactStagingDirectory)/packed
+            displayName: Publish
+            artifact: Packed
+
+  - stage: Deploy
+    displayName: Deploy to Nuget
+    variables:
+      - group: nugets
+
+    jobs:
+      
+      - job: Deploy
+        steps:
+
+          - download: current
+            artifact: Packed
+
+          - checkout: none
+
+          - script: dotnet nuget push
+                    "*$(Build.BuildNumber).nupkg"
+                    -s https://api.nuget.org/v3/index.json
+                    -k $(NugetApiKey)
+            displayName: Nuget push
+            workingDirectory: $(Pipeline.Workspace)/Packed
+
+          - script: rm -rf Packed
+            workingDirectory: $(Pipeline.Workspace)
+            displayName: Clean up
+
+
+
+          # - task: NuGetCommand@2
+          #   displayName: Internal nuget upload
+          #   inputs:
+          #     command: 'push'
+          #     packagesToPush: '$(Pipeline.Workspace)/Packed/*.nupkg'
+          #     nuGetFeedType: external
+          #     publishFeedCredentials: NuGet
