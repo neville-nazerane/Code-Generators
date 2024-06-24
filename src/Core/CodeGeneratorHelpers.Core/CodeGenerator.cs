@@ -14,7 +14,7 @@ namespace CodeGeneratorHelpers.Core
 
     public partial class CodeGenerator
     {
-
+        private const string DEFAULT_GENERATION_DESTINATION = "Generated";
         private readonly IFileService _fileService;
         private readonly GenerationState _state;
 
@@ -28,7 +28,6 @@ namespace CodeGeneratorHelpers.Core
         /// 
         /// Path within the target app to place generated files by default
         /// 
-        /// Default: "Generated"
         /// </summary>
         public string GenerationDestinationPath { get; }
 
@@ -46,7 +45,7 @@ namespace CodeGeneratorHelpers.Core
 
         internal CodeGenerator(IFileService fileService,
                                string targetAppPath,
-                               string generationDestinationPath = "Generated",
+                               string generationDestinationPath = DEFAULT_GENERATION_DESTINATION,
                                bool clearGenerationDestinationPath = false)
         {
             _fileService = fileService;
@@ -68,7 +67,7 @@ namespace CodeGeneratorHelpers.Core
 
         public static CodeGenerator Create(string targetAppPath,
                                            bool clearGenerationDestinationPath = false,
-                                         string generationDestinationPath = "Generated") 
+                                         string generationDestinationPath = DEFAULT_GENERATION_DESTINATION) 
             => new(new FileService(),
                    targetAppPath,
                    generationDestinationPath,

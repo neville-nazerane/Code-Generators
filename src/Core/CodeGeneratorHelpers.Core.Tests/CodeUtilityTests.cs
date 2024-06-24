@@ -66,7 +66,7 @@ interface SpiderMan {
 ";
 
             // ACT
-            var res = CodeUtility.GetCodeMetaData(data, "file.txt");
+            var res = CodeUtility.GetCodeMetadata(data, "file.txt");
 
             // ASSERT
             Assert.NotNull(res);

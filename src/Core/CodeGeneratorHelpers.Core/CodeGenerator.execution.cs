@@ -12,22 +12,17 @@ namespace CodeGeneratorHelpers.Core
     public partial class CodeGenerator
     {
 
-        private ConcurrentDictionary<string, CodeMetadata> FileMetaCache => _state._fileMetaCache;
-
         public Task<string> ReadTextInFileAsync(string filePath)
             => _fileService.ReadAllTextAsync(GetFullPath(filePath));
 
         public Task WriteAllTextToFileAsync(string filePath, string rawText)
             => _fileService.WriteAllTextAsync(GetFullPath(filePath, FullGenerationDestinationPath), rawText);
 
-        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath, bool useCache = true)
+        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath)
         {
-            if (!(useCache && FileMetaCache.TryGetValue(filePath, out var metadata)))
-            {
-                string fullFilePath = GetFullPath(filePath);
-                var text = await _fileService.ReadAllTextAsync(fullFilePath);
-                metadata = CodeUtility.GetCodeMetadata(text, filePath);
-            }
+            string fullFilePath = GetFullPath(filePath);
+            var text = await _fileService.ReadAllTextAsync(fullFilePath);
+            var metadata = CodeUtility.GetCodeMetadata(text, filePath);
             return metadata;
         }
 
@@ -44,13 +39,13 @@ namespace CodeGeneratorHelpers.Core
                                                  bool useCache = true)
         {
             var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, execution, useCache);
-            await foreach (var _ in items);
+            await foreach (var _ in items) ;
         }
 
         public IAsyncEnumerable<IEnumerable<CodeMetadata>> GetFilesMetaInBatchesAsync(string folderPath = null,
                                                                                       string filePattern = "*.cs",
                                                                                       int batchSize = 20,
-                                                                                      bool useCache = true) 
+                                                                                      bool useCache = true)
             => InternalReadAllFilesMetaDataAsync(folderPath, filePattern, batchSize, null, useCache);
 
 
@@ -98,8 +93,7 @@ namespace CodeGeneratorHelpers.Core
 
                 var tasks = chunk.Select(f => Task.Run(async () =>
                 {
-                    if (!(useCache && FileMetaCache.TryGetValue(f, out var metaData)))
-                        metaData = await ReadMetadataFromFileAsync(f, false);
+                    var metaData = await ReadMetadataFromFileAsync(f);
 
                     allMetaData.Add(metaData);
                     if (action is not null)
@@ -108,49 +102,10 @@ namespace CodeGeneratorHelpers.Core
 
                 await Task.WhenAll(tasks);
 
-                if (useCache)
-                    foreach (var metaData in allMetaData)
-                        if (!FileMetaCache.ContainsKey(metaData.SourceFilePath))
-                            FileMetaCache[metaData.SourceFilePath] = metaData;
-
                 yield return allMetaData.ToArray();
             }
 
         }
-
-        //public async Task<CodeGenerator> RunAsync()
-        //{
-        //    var fullTargetPath = GetFullTargetAppPath();
-
-        //    // TODO handle /\
-        //    var generationPath = _fileService.Combine(fullTargetPath, GenerationDestinationPath);
-
-        //    // clean up generation path
-        //    if (_fileService.DirectoryExists(generationPath) && ClearGenerationDestinationPath)
-        //        _fileService.DeleteDirectory(generationPath, true);
-
-        //    _fileService.CreateDirectory(generationPath);
-
-        //    var chunks = Processes.Chunk(MaxDegreeOfParallelism);
-
-        //    var state = new GenerationState
-        //    {
-        //        RootFullPath = fullTargetPath,
-        //        GenerationFullPath = generationPath
-        //    };
-
-        //    foreach (var chunk in chunks)
-        //    {
-        //        var tasks = chunk.Select(async c =>
-        //        {
-        //            var context = new GenerationContext(null, null);
-        //            await c(null);
-        //        }).ToArray();
-        //        await Task.WhenAll(tasks);
-        //    }
-
-        //    return this;
-        //}
 
     }
 }
