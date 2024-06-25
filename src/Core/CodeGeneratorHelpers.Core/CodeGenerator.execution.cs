@@ -35,35 +35,31 @@ namespace CodeGeneratorHelpers.Core
         public async Task ExecuteOnEachFileAsync(string folderPath = null,
                                                  string filePattern = "*.cs",
                                                  int maxDegreeOfParallelism = 10,
-                                                 Func<CodeMetadata, Task> execution = null,
-                                                 bool useCache = true)
+                                                 Func<CodeMetadata, Task> execution = null)
         {
-            var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, execution, useCache);
+            var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, execution);
             await foreach (var _ in items) ;
         }
 
         public IAsyncEnumerable<IEnumerable<CodeMetadata>> GetFilesMetaInBatchesAsync(string folderPath = null,
                                                                                       string filePattern = "*.cs",
-                                                                                      int batchSize = 20,
-                                                                                      bool useCache = true)
-            => InternalReadAllFilesMetaDataAsync(folderPath, filePattern, batchSize, null, useCache);
+                                                                                      int batchSize = 20)
+            => InternalReadAllFilesMetaDataAsync(folderPath, filePattern, batchSize, null);
 
 
         public async IAsyncEnumerable<CodeMetadata> GetFilesMetaAsAsyncEnumerable(string folderPath = null,
-                                                                                      string filePattern = "*.cs",
-                                                                                      bool useCache = true)
+                                                                                      string filePattern = "*.cs")
         {
-            var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, 1, null, useCache);
+            var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, 1, null);
             await foreach (var item in items)
                 yield return item.Single();
         }
 
         public async Task<IEnumerable<CodeMetadata>> GetAllFileMetaAsync(string folderPath = null,
                                                                          string filePattern = "*.cs",
-                                                                         int maxDegreeOfParallelism = 20,
-                                                                        bool useCache = true)
+                                                                         int maxDegreeOfParallelism = 20)
         {
-            var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, null, useCache);
+            var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, null);
             var res = new List<CodeMetadata>();
 
             await foreach (var item in items)
@@ -75,8 +71,7 @@ namespace CodeGeneratorHelpers.Core
         private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
                                                                                                     string filePattern = "*.cs",
                                                                                                     int maxDegreeOfParallelism = 10,
-                                                                                                    Func<CodeMetadata, Task> action = null,
-                                                                                                    bool useCache = true)
+                                                                                                    Func<CodeMetadata, Task> action = null)
         {
 
             var path = GetFullPath(folderPath);
