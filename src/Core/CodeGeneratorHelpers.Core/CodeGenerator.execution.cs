@@ -18,18 +18,12 @@ namespace CodeGeneratorHelpers.Core
         public Task WriteAllTextToFileAsync(string filePath, string rawText)
             => _fileService.WriteAllTextAsync(GetFullPath(filePath, FullGenerationDestinationPath), rawText);
 
-        public async Task<CodeMetadata> ReadMetadataFromFileAsync(string filePath)
+        public async Task<CodeMetadata> GetFileMetadataAsync(string filePath)
         {
             string fullFilePath = GetFullPath(filePath);
             var text = await _fileService.ReadAllTextAsync(fullFilePath);
             var metadata = CodeUtility.GetCodeMetadata(text, filePath);
             return metadata;
-        }
-
-        private string GetFullPath(string filePath, string basePath = null)
-        {
-            basePath ??= FullAppTargetPath;
-            return filePath is null ? basePath : _fileService.Combine(basePath, filePath);
         }
 
         public async Task ExecuteOnEachFileAsync(string folderPath = null,
@@ -41,13 +35,13 @@ namespace CodeGeneratorHelpers.Core
             await foreach (var _ in items) ;
         }
 
-        public IAsyncEnumerable<IEnumerable<CodeMetadata>> GetFilesMetaInBatchesAsync(string folderPath = null,
-                                                                                      string filePattern = "*.cs",
-                                                                                      int batchSize = 20)
+        public IAsyncEnumerable<IEnumerable<CodeMetadata>> GetAllFilesMetadataInBatchesAsync(string folderPath = null,
+                                                                                             string filePattern = "*.cs",
+                                                                                             int batchSize = 20)
             => InternalReadAllFilesMetaDataAsync(folderPath, filePattern, batchSize, null);
 
 
-        public async IAsyncEnumerable<CodeMetadata> GetFilesMetaAsAsyncEnumerable(string folderPath = null,
+        public async IAsyncEnumerable<CodeMetadata> GetAllFilesMetadataAsAsyncEnumerable(string folderPath = null,
                                                                                       string filePattern = "*.cs")
         {
             var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, 1, null);
@@ -55,7 +49,7 @@ namespace CodeGeneratorHelpers.Core
                 yield return item.Single();
         }
 
-        public async Task<IEnumerable<CodeMetadata>> GetAllFileMetaAsync(string folderPath = null,
+        public async Task<IEnumerable<CodeMetadata>> GetAllFilesMetadataAsync(string folderPath = null,
                                                                          string filePattern = "*.cs",
                                                                          int maxDegreeOfParallelism = 20)
         {
@@ -68,10 +62,12 @@ namespace CodeGeneratorHelpers.Core
             return res;
         }
 
+        #region Private
+        
         private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
-                                                                                                    string filePattern = "*.cs",
-                                                                                                    int maxDegreeOfParallelism = 10,
-                                                                                                    Func<CodeMetadata, Task> action = null)
+                                                                                            string filePattern = "*.cs",
+                                                                                            int maxDegreeOfParallelism = 10,
+                                                                                            Func<CodeMetadata, Task> action = null)
         {
 
             var path = GetFullPath(folderPath);
@@ -88,7 +84,7 @@ namespace CodeGeneratorHelpers.Core
 
                 var tasks = chunk.Select(f => Task.Run(async () =>
                 {
-                    var metaData = await ReadMetadataFromFileAsync(f);
+                    var metaData = await GetFileMetadataAsync(f);
 
                     allMetaData.Add(metaData);
                     if (action is not null)
@@ -102,5 +98,13 @@ namespace CodeGeneratorHelpers.Core
 
         }
 
+
+        private string GetFullPath(string filePath, string basePath = null)
+        {
+            basePath ??= FullAppTargetPath;
+            return filePath is null ? basePath : _fileService.Combine(basePath, filePath);
+        }
+
+        #endregion
     }
 }
