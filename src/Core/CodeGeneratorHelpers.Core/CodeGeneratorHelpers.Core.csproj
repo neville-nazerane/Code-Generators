@@ -10,6 +10,7 @@
 		</Description>
 
 		<PackageTags>console app; code generation</PackageTags>
+		<RepositoryUrl>https://github.com/neville-nazerane/Code-Generators</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
