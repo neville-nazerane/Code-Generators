@@ -26,10 +26,10 @@ namespace CodeGeneratorHelpers.Core
             return metadata;
         }
 
-        public async Task ExecuteOnEachFileAsync(string folderPath = null,
+        public async Task ExecuteOnEachFileAsync(Func<CodeMetadata, Task> execution,
+                                                 string folderPath = null,
                                                  string filePattern = "*.cs",
-                                                 int maxDegreeOfParallelism = 10,
-                                                 Func<CodeMetadata, Task> execution = null)
+                                                 int maxDegreeOfParallelism = 10)
         {
             var items = InternalReadAllFilesMetaDataAsync(folderPath, filePattern, maxDegreeOfParallelism, execution);
             await foreach (var _ in items) ;
@@ -65,9 +65,9 @@ namespace CodeGeneratorHelpers.Core
         #region Private
         
         private async IAsyncEnumerable<IEnumerable<CodeMetadata>> InternalReadAllFilesMetaDataAsync(string folderPath = null,
-                                                                                            string filePattern = "*.cs",
-                                                                                            int maxDegreeOfParallelism = 10,
-                                                                                            Func<CodeMetadata, Task> action = null)
+                                                                                                    string filePattern = "*.cs",
+                                                                                                    int maxDegreeOfParallelism = 10,
+                                                                                                    Func<CodeMetadata, Task> action = null)
         {
 
             var path = GetFullPath(folderPath);
