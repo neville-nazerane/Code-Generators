@@ -115,6 +115,8 @@ namespace CodeGeneratorHelpers.Core.Internals
             {
                 Name = syntax.Identifier.Text,
                 SourceFilePath = sourceFilePath,
+                Attributes = GetMetadata(syntax.AttributeLists),
+                ParentEnum = parentEnum,
                 Value = syntax.EqualsValue?.Value is LiteralExpressionSyntax literal ? (int?)literal.Token.Value : null
             };
 
