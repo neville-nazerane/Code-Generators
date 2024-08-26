@@ -4,7 +4,8 @@ namespace CodeGeneratorHelpers.Core.Internals
 {
     public interface IFileService
     {
-        string Combine(string path1, string path2);
+        string Combine(params string[] paths);
+        string CombineToFullPath(params string[] paths);
         void CreateDirectory(string path);
         void DeleteDirectory(string path);
         void DeleteDirectory(string path, bool recursive);

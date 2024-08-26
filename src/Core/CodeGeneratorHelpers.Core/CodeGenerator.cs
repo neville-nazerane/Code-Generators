@@ -56,7 +56,7 @@ namespace CodeGeneratorHelpers.Core
             var targetPath = GetFullTargetAppPath();
             _state = new GenerationState
             {
-                GenerationFullPath = _fileService.Combine(targetPath, GenerationDestinationPath),
+                GenerationFullPath = _fileService.CombineToFullPath(targetPath, GenerationDestinationPath),
                 RootFullPath = targetPath
             };
 
@@ -82,18 +82,18 @@ namespace CodeGeneratorHelpers.Core
         {
             char[] dirSeparators = ['/', '\\'];
 
-            var cleanedAppPath = Path.Combine(TargetAppPath.Split(dirSeparators));
+            var cleanedAppPath = _fileService.Combine(TargetAppPath.Split(dirSeparators));
             var dirs = _fileService.GetCurrentDirectory().Split(dirSeparators);
 
             var triedPaths = new List<string>();
 
             for (int i = dirs.Length - 1; i >= 0; i--)
             {
-                string path = Path.Combine(dirs.Take(i).ToArray());
+                string path = _fileService.CombineToFullPath(dirs.Take(i).ToArray());
                 if (path.EndsWith(cleanedAppPath) && _fileService.DirectoryExists(path))
                     return path;
                 triedPaths.Add(path);
-                path = Path.Combine(path, cleanedAppPath);
+                path = _fileService.CombineToFullPath(path, cleanedAppPath);
                 if (_fileService.DirectoryExists(path))
                     return path;
                 triedPaths.Add(path);
