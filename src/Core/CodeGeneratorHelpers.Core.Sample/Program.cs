@@ -15,10 +15,10 @@ var generator = CodeGenerator.Create("CodeGeneratorHelpers.Core",
 //                                       execution: PrintModelsAsync);
 
 
-await generator.ExecuteOnEachFileAsync(execution: meta => generator.WriteAllTextToFileAsync($"{meta.SourceFilePath}.txt", $"Found {meta.Classes?.Count() ?? 0} classes"));
+//await generator.ExecuteOnEachFileAsync(execution: meta => generator.WriteAllTextToFileAsync($"{meta.SourceFilePath}.txt", $"Found {meta.Classes?.Count() ?? 0} classes"));
 
 
-await generator.ExecuteOnEachFileAsync(ExecuteOnEachAsync);
+//await generator.ExecuteOnEachFileAsync(ExecuteOnEachAsync);
 
 
 
@@ -34,8 +34,13 @@ await foreach (var batch in batches)
     // add all names to a concurrent bag
     // this way you ensure only the relevant data stays in memory
     foreach (var name in names)
+    {
         allInterfaceNames.Add(name);
+        Console.WriteLine(name);
+    }
 }
+
+return;
 
 
 var files = generator.GetAllFilesMetadataAsAsyncEnumerable();

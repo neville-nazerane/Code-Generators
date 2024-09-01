@@ -102,7 +102,7 @@ namespace CodeGeneratorHelpers.Core
         private string GetFullPath(string filePath, string basePath = null)
         {
             basePath ??= FullAppTargetPath;
-            return filePath is null ? basePath : _fileService.Combine(basePath, filePath);
+            return filePath is null ? basePath : _fileService.CombineToFullPath(basePath, filePath);
         }
 
         #endregion

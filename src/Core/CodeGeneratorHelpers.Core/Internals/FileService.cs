@@ -19,7 +19,18 @@ namespace CodeGeneratorHelpers.Core.Internals
 
         public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
-        public string Combine(string path1, string path2) => Path.Combine(path1, path2);
+        public string Combine(params string[] paths) => Path.Combine(paths);
+
+        public string CombineToFullPath(params string[] paths)
+        {
+            var res = new StringBuilder(Path.Combine(paths));
+
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                res.Insert(0, Path.DirectorySeparatorChar);
+
+            return res.ToString();
+        }
+
 
         public Task<string> ReadAllTextAsync(string path) => File.ReadAllTextAsync(path);
 
