@@ -25,9 +25,9 @@ namespace CodeGeneratorHelpers.Core.Tests
             // ARRANGE
             string[] locations = [
                 "C:",
-                Path.Combine("C:", "data"),
-                Path.Combine("C:", "data", "code"),
-                Path.Combine("C:", "data", "code", "myproject")
+                "C:/data",
+                "C:/data/code",
+                "C:/data/code/myproject"
             ];
 
             string currentPath = "C:/data/code/myproject";
@@ -36,6 +36,7 @@ namespace CodeGeneratorHelpers.Core.Tests
                              .Returns(currentPath);
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
+            MockCombineFullPath();
 
             var codeGenerator = new CodeGenerator(_mockedFileService.Object, "myproject");
 
@@ -52,9 +53,9 @@ namespace CodeGeneratorHelpers.Core.Tests
             // ARRANGE
             string[] locations = [
                 "C:",
-                Path.Combine("C:", "data"),
-                Path.Combine("C:", "data", "code"),
-                Path.Combine("C:", "data", "code", "myproject")
+                "C:/data",
+                "C:/data/code",
+                "C:/data/code/myproject"
             ];
 
             string currentPath = "C:/data/code/myproject";
@@ -63,6 +64,7 @@ namespace CodeGeneratorHelpers.Core.Tests
                              .Returns(currentPath);
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
+            MockCombineFullPath();
 
             var codeGenerator = new CodeGenerator(_mockedFileService.Object, "C:/data/code/myproject");
 
@@ -79,17 +81,17 @@ namespace CodeGeneratorHelpers.Core.Tests
             // ARRANGE
             string[] locations = [
                 "C:",
-                Path.Combine("C:", "data"),
-                Path.Combine("C:", "data", "code"),
-                Path.Combine("C:", "data", "code", "myproject")
+                "C:/data",
+                "C:/data/code",
+                "C:/data/code/myproject"
             ];
 
-            string currentPath = "code/myproject";
-
             _mockedFileService.Setup(f => f.GetCurrentDirectory())
-                             .Returns(currentPath);
+                             .Returns("C:/data/code/myproject");
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
+
+            MockCombineFullPath();
 
             var codeGenerator = new CodeGenerator(_mockedFileService.Object, "C:/data/code/myproject");
 
@@ -106,9 +108,9 @@ namespace CodeGeneratorHelpers.Core.Tests
             // ARRANGE
             string[] locations = [
                 "C:",
-                Path.Combine("C:", "data"),
-                Path.Combine("C:", "data", "code"),
-                Path.Combine("C:", "data", "code", "myproject")
+                "C:/data",
+                "C:/data/code",
+                "C:/data/code/myproject"
             ];
 
             string currentPath = "C:/data/code/myproject";
@@ -117,6 +119,7 @@ namespace CodeGeneratorHelpers.Core.Tests
                              .Returns(currentPath);
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
+            MockCombineFullPath();
 
             // ACT & ASSERT
             Assert.Throws<DirectoryNotFoundException>(() => new CodeGenerator(_mockedFileService.Object, "notmyproject"));
@@ -129,17 +132,18 @@ namespace CodeGeneratorHelpers.Core.Tests
             // ARRANGE
             string[] locations = [
                 "C:",
-                Path.Combine("C:", "data"),
-                Path.Combine("C:", "data", "code"),
-                Path.Combine("C:", "data", "code", "myproject")
+                "C:/data",
+                "C:/data/code",
+                "C:/data/code/myproject"
             ];
 
             string currentPath = "C:/data/code/myproject";
 
             _mockedFileService.Setup(f => f.GetCurrentDirectory())
-                             .Returns(currentPath);
+                              .Returns(currentPath);
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
-                             .Returns((string d) => locations.Contains(d));
+                              .Returns((string d) => locations.Contains(d));
+            MockCombineFullPath();
 
             var codeGenerator = new CodeGenerator(_mockedFileService.Object, "code");
 
@@ -156,11 +160,11 @@ namespace CodeGeneratorHelpers.Core.Tests
             // ARRANGE
             string[] locations = [
                 "C:",
-                Path.Combine("C:", "data"),
-                Path.Combine("C:", "data", "code"),
-                Path.Combine("C:", "data", "code", "myproject"),
-                Path.Combine("C:", "data", "src"),
-                Path.Combine("C:", "data", "src", "realProject"),
+                "C:/data",
+                "C:/data/code",
+                "C:/data/code/myproject",
+                "C:/data/src",
+                "C:/data/src/realProject"
             ];
 
             string currentPath = "C:/data/code/myproject";
@@ -169,6 +173,7 @@ namespace CodeGeneratorHelpers.Core.Tests
                              .Returns(currentPath);
             _mockedFileService.Setup(f => f.DirectoryExists(It.IsAny<string>()))
                              .Returns((string d) => locations.Contains(d));
+            MockCombineFullPath();
 
             var codeGenerator = new CodeGenerator(_mockedFileService.Object, "src/realProject");
 
@@ -177,6 +182,14 @@ namespace CodeGeneratorHelpers.Core.Tests
 
             // ASSERT
             Assert.Equal(Path.GetFullPath("C:/data/src/realProject"), Path.GetFullPath(res));
+        }
+
+        private void MockCombineFullPath()
+        {
+            _mockedFileService.Setup(f => f.Combine(It.IsAny<string[]>()))
+                              .Returns((string[] arr) => string.Join('/', arr));
+            _mockedFileService.Setup(f => f.CombineToFullPath(It.IsAny<string[]>()))
+                              .Returns((string[] arr) => string.Join('/', arr.Where(a => !string.IsNullOrEmpty(a))));
         }
 
     }
