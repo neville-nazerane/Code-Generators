@@ -25,8 +25,9 @@ namespace CodeGeneratorHelpers.Core.Internals
         {
             var res = new StringBuilder(Path.Combine(paths));
 
-            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-                res.Insert(0, Path.DirectorySeparatorChar);
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()
+                && res[0] != Path.DirectorySeparatorChar)
+                    res.Insert(0, Path.DirectorySeparatorChar);
 
             return res.ToString();
         }
